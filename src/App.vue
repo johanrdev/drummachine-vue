@@ -1,11 +1,15 @@
 <template lang="html">
   <div class="relative my-32">
-    <button @click="play" class="block w-24 h-12 mx-auto border rounded border-gray-400 bg-gray-200">Play</button>
+    <button @click="toggle" class="block w-24 h-12 mx-auto border rounded border-gray-400 bg-gray-200">
+      <span v-if="!playback.playing">Play</span>
+      <span v-else>Pause</span>
+    </button>
   </div>
 </template>
 <script>
 import { Howl } from 'howler'
 import Timer from './classes/Timer'
+import { ref } from 'vue'
 
 export default {
   setup() {
@@ -150,13 +154,14 @@ export default {
       }
     }
 
-    const playback = {
+    const playback = ref({
+      playing: false,
       bpm: 120,
       beat: {
         value: 0,
         max: 16
       }
-    }
+    })
 
     const pattern = [
       { name: 'Closed-Hihat-01', notes: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1] },
@@ -165,28 +170,35 @@ export default {
     ]
 
     const repeat = () => {
-      if (playback.beat.value >= playback.beat.max) {
-        playback.beat.value = 0
+      if (playback.value.beat.value >= playback.value.beat.max) {
+        playback.value.beat.value = 0
       }
 
       pattern.forEach((track) => {
-        if (track.notes[playback.beat.value] === 1) {
+        if (track.notes[playback.value.beat.value] === 1) {
           howl.play(track.name)
         }
       }) 
 
-      playback.beat.value += 1
+      playback.value.beat.value += 1
     }
 
-    const play = () => {
-      timer.start()
+    const toggle = () => {
+      if (!playback.value.playing) {
+        timer.start()
+      } else {
+        timer.pause()
+      }
+
+      playback.value.playing = !playback.value.playing
     }
 
     const howl = new Howl(sprite)
-    const timer = new Timer(repeat, (60000 / playback.bpm) / 4)
+    const timer = new Timer(repeat, (60000 / playback.value.bpm) / 4)
 
-    return { 
-      play
+    return {
+      playback, 
+      toggle
     }
   }
 }

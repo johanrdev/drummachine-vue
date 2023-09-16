@@ -10,12 +10,12 @@ export default class Timer {
   }
 
   start = () => {
-    this.stop()
+    this.pause()
     this.time = Date.now() + this.interval
     this.timeout = setTimeout(this.repeat, this.interval)
   }
 
-  stop = () => {
+  pause = () => {
     clearTimeout(this.timeout)
   }
 
