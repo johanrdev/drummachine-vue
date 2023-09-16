@@ -305,7 +305,7 @@ export default {
         playback.value.bpm.value = playback.value.bpm.max
       }
 
-      updateInterval()
+      timer.updateInterval((60000 / playback.value.bpm.value) / 4)
     }
 
     const updateInterval = () => {

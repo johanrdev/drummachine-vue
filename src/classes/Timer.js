@@ -1,4 +1,5 @@
 export default class Timer {
+  running
   callback
   interval
   time
@@ -10,19 +11,21 @@ export default class Timer {
   }
 
   start = () => {
+    this.running = true
     this.stop()
     this.time = Date.now() + this.interval
     this.timeout = setTimeout(this.repeat, this.interval)
+
+    console.log(this.running)
   }
 
   stop = () => {
+    this.running = false
     clearTimeout(this.timeout)
   }
 
   updateInterval = (interval) => {
-    this.stop()
     this.interval = interval
-    this.start()
   }
 
   repeat = () => {
