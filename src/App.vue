@@ -34,9 +34,9 @@
             </button>
           </div>
           <div class="md-col-start-3 md:flex justify-end gap-1 hidden">
-            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">1</span>
-            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">2</span>
-            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">3</span>
+            <label for="bpm">
+              <input type="number" id="bpm" v-model="playback.bpm.value" :min="playback.bpm.min" :max="playback.bpm.max" class="px-2 text-2xl font-semibold border-2 rounded w-24" @input="updateInterval" @change="updateTempo" />
+            </label>
           </div>
         </nav>
         <div class="border p-3">
@@ -211,7 +211,11 @@ export default {
 
     const playback = ref({
       playing: false,
-      bpm: 120,
+      bpm: {
+        value: 120,
+        min: 30,
+        max: 300
+      },
       beat: {
         value: 0,
         max: 16
@@ -292,14 +296,35 @@ export default {
       playback.value.beat.value = 0
     }
 
+    const updateTempo = () => {
+      if (playback.value.bpm.value < playback.value.bpm.min) {
+        playback.value.bpm.value = playback.value.bpm.min
+      }
+
+      if (playback.value.bpm.value > playback.value.bpm.max) {
+        playback.value.bpm.value = playback.value.bpm.max
+      }
+
+      updateInterval()
+    }
+
+    const updateInterval = () => {
+      if (playback.value.bpm.value < playback.value.bpm.min) return
+      if (playback.value.bpm.value > playback.value.bpm.max) return
+
+      timer.updateInterval((60000 / playback.value.bpm.value) / 4)
+    }
+
     const howl = new Howl(sprite)
-    const timer = new Timer(repeat, (60000 / playback.value.bpm) / 4)
+    const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
 
     return {
       playback,
       toggle,
       stop,
       rewind,
+      updateTempo,
+      updateInterval,
       filters,
       pattern
     }

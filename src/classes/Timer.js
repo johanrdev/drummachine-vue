@@ -19,6 +19,12 @@ export default class Timer {
     clearTimeout(this.timeout)
   }
 
+  updateInterval = (interval) => {
+    this.stop()
+    this.interval = interval
+    this.start()
+  }
+
   repeat = () => {
     let drift = Date.now() - this.time
     this.callback()
