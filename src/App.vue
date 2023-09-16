@@ -8,7 +8,29 @@
         <span>Section 1</span>
       </div>
       <div class="md:col-span-9 order-0 md:order-1">
-        <nav class="border p-3 mb-3">
+        <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
+          <div class="md-col-start-1 md:flex justify-start gap-1 hidden">
+            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">1</span>
+            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">2</span>
+            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">3</span>
+          </div>
+          <div class="md:col-start-2 flex justify-center gap-1">
+            <button class="w-full md:w-10 h-10 border rounded" @click="toggle">
+              <font-awesome-icon :icon="['fas', 'play']" v-if="!playback.playing"></font-awesome-icon>
+              <font-awesome-icon :icon="['fas', 'pause']" v-else></font-awesome-icon>
+            </button>
+            <button class="w-full md:w-10 h-10 border rounded" @click="stop">
+              <font-awesome-icon :icon="['fas', 'stop']"></font-awesome-icon>
+            </button>
+            <button class="w-full md:w-10 h-10 border rounded" @click="rewind">
+              <font-awesome-icon :icon="['fas', 'backward']"></font-awesome-icon>
+            </button>
+          </div>
+          <div class="md-col-start-3 md:flex justify-end gap-1 hidden">
+            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">1</span>
+            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">2</span>
+            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">3</span>
+          </div>
         </nav>
         <div class="border p-3">Section 2</div>
       </div>
@@ -187,7 +209,7 @@ export default {
         if (track.notes[playback.value.beat.value] === 1) {
           howl.play(track.name)
         }
-      }) 
+      })
 
       playback.value.beat.value += 1
     }
@@ -196,18 +218,30 @@ export default {
       if (!playback.value.playing) {
         timer.start()
       } else {
-        timer.pause()
+        timer.stop()
       }
 
       playback.value.playing = !playback.value.playing
+    }
+
+    const stop = () => {
+      playback.value.playing = false
+      playback.value.beat.value = 0
+      timer.stop()
+    }
+
+    const rewind = () => {
+      playback.value.beat.value = 0
     }
 
     const howl = new Howl(sprite)
     const timer = new Timer(repeat, (60000 / playback.value.bpm) / 4)
 
     return {
-      playback, 
-      toggle
+      playback,
+      toggle,
+      stop,
+      rewind
     }
   }
 }
