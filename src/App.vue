@@ -4,12 +4,11 @@
       <span class="block font-semibold text-slate-200 text-2xl text-center">GrooveBox</span>
     </header>
     <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
-      <div class="border md:col-span-3 p-3">
+      <div class="border md:col-span-3 order-1 md:order-0 p-3">
         <span>Section 1</span>
       </div>
-      <div class="md:col-span-9">
+      <div class="md:col-span-9 order-0 md:order-1">
         <nav class="border p-3 mb-3">
-          <span>Navbar</span>
         </nav>
         <div class="border p-3">Section 2</div>
       </div>
