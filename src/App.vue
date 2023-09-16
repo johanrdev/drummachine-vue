@@ -1,9 +1,19 @@
 <template lang="html">
-  <div class="relative my-32">
-    <button @click="toggle" class="block w-24 h-12 mx-auto border rounded border-gray-400 bg-gray-200">
-      <span v-if="!playback.playing">Play</span>
-      <span v-else>Pause</span>
-    </button>
+  <div class="flex flex-col max-w-7xl shadow-xl border rounded-lg overflow-hidden mx-4 my-10 xl:mx-auto lg:mt-32">
+    <header class="bg-slate-400 p-3">
+      <span class="block font-semibold text-slate-200 text-2xl text-center">GrooveBox</span>
+    </header>
+    <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
+      <div class="border md:col-span-3 p-3">
+        <span>Section 1</span>
+      </div>
+      <div class="md:col-span-9">
+        <nav class="border p-3 mb-3">
+          <span>Navbar</span>
+        </nav>
+        <div class="border p-3">Section 2</div>
+      </div>
+    </section>
   </div>
 </template>
 <script>
