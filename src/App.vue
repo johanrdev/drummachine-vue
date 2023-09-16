@@ -150,8 +150,32 @@ export default {
       }
     }
 
+    const playback = {
+      bpm: 120,
+      beat: {
+        value: 0,
+        max: 16
+      }
+    }
+
+    const pattern = [
+      { name: 'Closed-Hihat-01', notes: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1] },
+      { name: 'Snare-01', notes: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0] },
+      { name: 'Kick-02', notes: [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0] }
+    ]
+
     const repeat = () => {
-      howl.play('Kick-01')
+      if (playback.beat.value >= playback.beat.max) {
+        playback.beat.value = 0
+      }
+
+      pattern.forEach((track) => {
+        if (track.notes[playback.beat.value] === 1) {
+          howl.play(track.name)
+        }
+      }) 
+
+      playback.beat.value += 1
     }
 
     const play = () => {
@@ -159,7 +183,7 @@ export default {
     }
 
     const howl = new Howl(sprite)
-    const timer = new Timer(repeat, (60000 / 80) / 4)
+    const timer = new Timer(repeat, (60000 / playback.bpm) / 4)
 
     return { 
       play
