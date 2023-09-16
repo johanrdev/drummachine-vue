@@ -10,7 +10,11 @@
       <div class="md:col-span-9 order-0 md:order-1">
         <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
           <div class="md-col-start-1 md:flex justify-start gap-1 hidden">
-            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">1</span>
+            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">
+              <button class="w-full md:w-10 h-10 border rounded" @click="reverse">
+                <font-awesome-icon :icon="['fas', 'arrows-rotate']"></font-awesome-icon>
+              </button>
+            </span>
             <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">2</span>
             <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">3</span>
           </div>
@@ -211,18 +215,31 @@ export default {
       }
     })
 
-    const pattern = [
-      { name: 'Closed-Hihat-01', notes: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1] },
-      { name: 'Snare-01', notes: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0] },
-      { name: 'Kick-02', notes: [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0] }
-    ]
+    const pattern = ref([
+      { 
+        name: 'Closed-Hihat-01', 
+        notes: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1] 
+      },
+      { 
+        name: 'Snare-01', 
+        notes: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0] 
+      },
+      { 
+        name: 'Kick-02', 
+        notes: [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0] 
+      }
+    ])
+
+    const reverse = () => {
+      pattern.value.reverse()
+    }
 
     const repeat = () => {
       if (playback.value.beat.value >= playback.value.beat.max) {
         playback.value.beat.value = 0
       }
 
-      pattern.forEach((track) => {
+      pattern.value.forEach((track) => {
         if (track.notes[playback.value.beat.value] === 1) {
           howl.play(track.name)
         }
@@ -259,6 +276,7 @@ export default {
       toggle,
       stop,
       rewind,
+      reverse,
       pattern
     }
   }
