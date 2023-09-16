@@ -33,13 +33,18 @@
           </div>
         </nav>
         <div class="border p-3">
-          <ul class="border-4 overflow-auto pb-4">
+          <ul class="overflow-auto h-80">
             <li v-for="(track, trackIndex) in pattern" class="flex">
-              <span class="h-10 px-2 min-w-[100px] whitespace-nowrap overflow-hidden border hidden sm:flex sm:grow sm:items-center">{{ track.name }}</span>
+              <span
+                class="h-12 px-2 mr-1 min-w-[150px] whitespace-nowrap overflow-hidden border hidden md:flex md:grow md:items-center select-none cursor-move">{{
+                  track.name }}</span>
 
               <ul class="flex">
-                <li v-for="(note, noteIndex) in track.notes">
-                  <span class="w-10 h-10 border flex items-center justify-center bg-blue-500 text-white">{{ note }}</span>
+                <li v-for="(note, noteIndex) in track.notes" class="mr-1 last:mr-0">
+                  <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
+                    class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
+                    :class="{ 'bg-slate-200 checked:bg-teal-600': noteIndex === playback.beat.value - 1 }" :false-value="0"
+                    :true-value="1" @keydown.prevent />
                 </li>
               </ul>
             </li>
