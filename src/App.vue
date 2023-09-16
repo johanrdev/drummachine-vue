@@ -10,41 +10,42 @@
       <div class="md:col-span-9 order-0 md:order-1">
         <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
           <div class="md-col-start-1 md:flex justify-start gap-1 hidden">
-            <button class="w-full md:w-10 h-10 block border rounded select-none" @click="filters.reverse">
+            <button class="w-full md:w-10 h-10 block rounded select-none bg-slate-100 text-slate-500" @click="filters.reverse">
               <font-awesome-icon :icon="['fas', 'arrows-rotate']"></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 block border rounded select-none" @click="filters.shuffle">
+            <button class="w-full md:w-10 h-10 block rounded select-none bg-slate-100 text-slate-500" @click="filters.shuffle">
               <font-awesome-icon :icon="['fas', 'shuffle']"></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 block border rounded select-none" @click="filters.sort">
+            <button class="w-full md:w-10 h-10 block rounded select-none bg-slate-100 text-slate-500" @click="filters.sort">
               <font-awesome-icon
                 :icon="['fas', filters.dir === 'asc' ? 'arrow-down-z-a' : 'arrow-down-a-z']"></font-awesome-icon>
             </button>
           </div>
           <div class="md:col-start-2 flex justify-center gap-1">
-            <button class="w-full md:w-10 h-10 border rounded" @click="toggle">
+            <button class="w-full md:w-10 h-10 rounded" :class="{ 'bg-rose-500 text-white': playback.playing, 'bg-slate-100 text-slate-500': !playback.playing }" @click="toggle">
               <font-awesome-icon :icon="['fas', 'play']" v-if="!playback.playing"></font-awesome-icon>
               <font-awesome-icon :icon="['fas', 'pause']" v-else></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 border rounded" @click="stop">
+            <button class="w-full md:w-10 h-10 rounded bg-slate-100 text-slate-500" @click="stop">
               <font-awesome-icon :icon="['fas', 'stop']"></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 border rounded" @click="rewind">
+            <button class="w-full md:w-10 h-10 rounded bg-slate-100 text-slate-500" @click="rewind">
               <font-awesome-icon :icon="['fas', 'backward']"></font-awesome-icon>
             </button>
           </div>
           <div class="md-col-start-3 md:flex justify-end gap-1 hidden">
-            <label for="bpm">
-              <input type="number" id="bpm" v-model="playback.bpm.value" :min="playback.bpm.min" :max="playback.bpm.max" class="px-2 text-2xl font-semibold border-2 rounded w-24" @input="updateInterval" @change="updateTempo" />
+            <label for="bpm" class="flex">
+              <input type="number" id="bpm" v-model="playback.bpm.value" :min="playback.bpm.min" :max="playback.bpm.max"
+                class="px-2 text-2xl font-semibold rounded w-24 bg-slate-100 text-slate-500" @input="updateInterval" @change="updateTempo" />
             </label>
           </div>
         </nav>
-        <div class="border p-3">
+        <div>
           <ul class="overflow-auto h-80">
             <li v-for="(track, trackIndex) in pattern" class="flex">
               <span
-                class="h-12 px-2 mr-1 min-w-[150px] whitespace-nowrap overflow-hidden border hidden md:flex md:grow md:items-center select-none cursor-move">{{
-                  track.name }}</span>
+                class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move uppercase text-md tracking-wide font-semibold bg-slate-100 text-slate-500 rounded">{{
+                  track.name.replaceAll('-', ' ') }}</span>
 
               <ul class="flex">
                 <li v-for="(_, noteIndex) in track.notes" class="mr-1 last:mr-0">
