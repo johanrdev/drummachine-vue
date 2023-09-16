@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .action-btn {
+    @apply w-full md:w-10 h-10 block rounded select-none bg-slate-100 text-slate-500
+  }
+}

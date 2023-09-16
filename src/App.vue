@@ -1,7 +1,7 @@
 <template lang="html">
   <div class="flex flex-col max-w-7xl shadow-xl border rounded-lg overflow-hidden mx-4 my-10 xl:mx-auto lg:mt-32">
     <header class="bg-slate-400 p-3">
-      <span class="block font-semibold text-slate-200 text-2xl text-center">GrooveBox</span>
+      <span class="block font-semibold text-slate-200 text-2xl text-center select-none§">GrooveBox</span>
     </header>
     <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
       <div class="border md:col-span-3 order-1 md:order-0 p-3">
@@ -10,48 +10,49 @@
       <div class="md:col-span-9 order-0 md:order-1">
         <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
           <div class="md-col-start-1 md:flex justify-start gap-1 hidden">
-            <button class="w-full md:w-10 h-10 block rounded select-none bg-slate-100 text-slate-500" @click="filters.reverse">
+            <button class="action-btn" @click="filters.reverse">
               <font-awesome-icon :icon="['fas', 'arrows-rotate']"></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 block rounded select-none bg-slate-100 text-slate-500" @click="filters.shuffle">
+            <button class="action-btn" @click="filters.shuffle">
               <font-awesome-icon :icon="['fas', 'shuffle']"></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 block rounded select-none bg-slate-100 text-slate-500" @click="filters.sort">
+            <button class="action-btn" @click="filters.sort">
               <font-awesome-icon
                 :icon="['fas', filters.dir === 'asc' ? 'arrow-down-z-a' : 'arrow-down-a-z']"></font-awesome-icon>
             </button>
           </div>
           <div class="md:col-start-2 flex justify-center gap-1">
-            <button class="w-full md:w-10 h-10 rounded" :class="{ 'bg-rose-500 text-white': playback.playing, 'bg-slate-100 text-slate-500': !playback.playing }" @click="toggle">
+            <button class="action-btn" :class="{ 'bg-rose-500 text-white': playback.playing }" @click="toggle">
               <font-awesome-icon :icon="['fas', 'play']" v-if="!playback.playing"></font-awesome-icon>
               <font-awesome-icon :icon="['fas', 'pause']" v-else></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 rounded bg-slate-100 text-slate-500" @click="stop">
+            <button class="action-btn" @click="stop">
               <font-awesome-icon :icon="['fas', 'stop']"></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 rounded bg-slate-100 text-slate-500" @click="rewind">
+            <button class="action-btn" @click="rewind">
               <font-awesome-icon :icon="['fas', 'backward']"></font-awesome-icon>
             </button>
           </div>
           <div class="md-col-start-3 md:flex justify-end gap-1 hidden">
             <label for="bpm" class="flex">
               <input type="number" id="bpm" v-model="playback.bpm.value" :min="playback.bpm.min" :max="playback.bpm.max"
-                class="px-2 text-2xl font-semibold rounded w-24 bg-slate-100 text-slate-500" @input="updateInterval" @change="updateTempo" />
+                class="px-2 text-2xl font-semibold rounded w-24 bg-slate-100 text-slate-500 outline-none"
+                @input="updateInterval" @change="updateTempo" @focus.native="$event.target.select()" />
             </label>
           </div>
         </nav>
         <div>
-          <ul class="overflow-auto h-80">
+          <ul class="overflow-auto h-80 flex flex-col">
             <li v-for="(track, trackIndex) in pattern" class="flex">
               <span
-                class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move uppercase text-md tracking-wide font-semibold bg-slate-100 text-slate-500 rounded">{{
+                class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move uppercase text-md font-semibold text-sm bg-slate-100 text-slate-500 rounded">{{
                   track.name.replaceAll('-', ' ') }}</span>
 
               <ul class="flex">
-                <li v-for="(_, noteIndex) in track.notes" class="mr-1 last:mr-0">
+                <li v-for="(_, noteIndex) in track.notes" class="flex mb-1 mr-1 last:mr-0">
                   <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
                     class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
-                    :class="{ 'bg-slate-200 checked:bg-teal-600': noteIndex === playback.beat.value - 1 }"
+                    :class="{ 'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1 }"
                     :false-value="0" :true-value="1" @keydown.prevent />
                 </li>
               </ul>
@@ -332,4 +333,10 @@ export default {
   }
 }
 </script>
-<style lang="css"></style>
+<style lang="css">
+@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+
+#app {
+  font-family: 'Poppins';
+}
+</style>
