@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPlay, faPause, faStop, faBackward, faArrowsRotate } from '@fortawesome/free-solid-svg-icons'
+import { faPlay, faPause, faStop, faBackward, faArrowsRotate, faArrowDownAZ, faArrowDownZA } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const app = createApp(App)
@@ -12,6 +12,8 @@ library.add(faPause)
 library.add(faStop)
 library.add(faBackward)
 library.add(faArrowsRotate)
+library.add(faArrowDownAZ)
+library.add(faArrowDownZA)
 
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.mount('#app')

@@ -10,13 +10,15 @@
       <div class="md:col-span-9 order-0 md:order-1">
         <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
           <div class="md-col-start-1 md:flex justify-start gap-1 hidden">
-            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">
-              <button class="w-full md:w-10 h-10 border rounded" @click="reverse">
-                <font-awesome-icon :icon="['fas', 'arrows-rotate']"></font-awesome-icon>
-              </button>
-            </span>
-            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">2</span>
-            <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">3</span>
+            <button class="w-full md:w-10 h-10 block border rounded select-none" @click="filters.reverse">
+              <font-awesome-icon :icon="['fas', 'arrows-rotate']"></font-awesome-icon>
+            </button>
+            <button class="w-full md:w-10 h-10 block border rounded select-none" @click="filters.sort">
+              <font-awesome-icon :icon="['fas', filters.dir === 'asc' ? 'arrow-down-z-a' : 'arrow-down-a-z']"></font-awesome-icon>
+            </button>
+            <button class="w-full md:w-10 h-10 block border rounded select-none">
+              <!-- <font-awesome-icon :icon="['fas', 'arrows-rotate']"></font-awesome-icon> -->
+            </button>
           </div>
           <div class="md:col-start-2 flex justify-center gap-1">
             <button class="w-full md:w-10 h-10 border rounded" @click="toggle">
@@ -44,11 +46,11 @@
                   track.name }}</span>
 
               <ul class="flex">
-                <li v-for="(note, noteIndex) in track.notes" class="mr-1 last:mr-0">
+                <li v-for="(_, noteIndex) in track.notes" class="mr-1 last:mr-0">
                   <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
                     class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
-                    :class="{ 'bg-slate-200 checked:bg-teal-600': noteIndex === playback.beat.value - 1 }" :false-value="0"
-                    :true-value="1" @keydown.prevent />
+                    :class="{ 'bg-slate-200 checked:bg-teal-600': noteIndex === playback.beat.value - 1 }"
+                    :false-value="0" :true-value="1" @keydown.prevent />
                 </li>
               </ul>
             </li>
@@ -216,23 +218,33 @@ export default {
     })
 
     const pattern = ref([
-      { 
-        name: 'Closed-Hihat-01', 
-        notes: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1] 
+      {
+        name: 'Closed-Hihat-01',
+        notes: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1]
       },
-      { 
-        name: 'Snare-01', 
-        notes: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0] 
+      {
+        name: 'Snare-01',
+        notes: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
       },
-      { 
-        name: 'Kick-02', 
-        notes: [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0] 
+      {
+        name: 'Kick-02',
+        notes: [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0]
       }
     ])
 
-    const reverse = () => {
-      pattern.value.reverse()
-    }
+    const filters = ref({
+      dir: 'asc',
+      reverse: () => pattern.value.reverse(),
+      sort: () => {
+        if (filters.value.dir === 'asc') {
+          pattern.value.sort((a, b) => a.name < b.name)
+        } else {
+          pattern.value.sort((a, b) => a.name > b.name)
+        }
+
+        filters.value.dir = filters.value.dir === 'asc' ? 'desc' : 'asc'
+      }
+    })
 
     const repeat = () => {
       if (playback.value.beat.value >= playback.value.beat.max) {
@@ -276,7 +288,7 @@ export default {
       toggle,
       stop,
       rewind,
-      reverse,
+      filters,
       pattern
     }
   }
