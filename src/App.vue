@@ -32,7 +32,19 @@
             <span class="w-full md:w-10 h-10 block border rounded leading-9 text-center select-none">3</span>
           </div>
         </nav>
-        <div class="border p-3">Section 2</div>
+        <div class="border p-3">
+          <ul class="border-4 overflow-auto pb-4">
+            <li v-for="(track, trackIndex) in pattern" class="flex">
+              <span class="h-10 px-2 min-w-[100px] whitespace-nowrap overflow-hidden border hidden sm:flex sm:grow sm:items-center">{{ track.name }}</span>
+
+              <ul class="flex">
+                <li v-for="(note, noteIndex) in track.notes">
+                  <span class="w-10 h-10 border flex items-center justify-center bg-blue-500 text-white">{{ note }}</span>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
       </div>
     </section>
   </div>
@@ -241,7 +253,8 @@ export default {
       playback,
       toggle,
       stop,
-      rewind
+      rewind,
+      pattern
     }
   }
 }
