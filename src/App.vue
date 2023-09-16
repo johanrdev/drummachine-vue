@@ -4,8 +4,12 @@
       <span class="block font-semibold text-slate-200 text-2xl text-center select-none§">GrooveBox</span>
     </header>
     <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
-      <div class="border md:col-span-3 order-1 md:order-0 p-3">
-        <span>Section 1</span>
+      <div class="md:col-span-3 order-1 md:order-0">
+        <ul class="max-h-80 overflow-y-auto">
+          <li v-for="sample in samples" class="mb-1 last:mb-0">
+            <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500">{{ sample }}</div>
+          </li>
+        </ul>
       </div>
       <div class="md:col-span-9 order-0 md:order-1">
         <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
@@ -45,7 +49,7 @@
           <ul class="overflow-auto h-80 flex flex-col">
             <li v-for="(track, trackIndex) in pattern" class="flex">
               <span
-                class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move uppercase text-md font-semibold text-sm bg-slate-100 text-slate-500 rounded">{{
+                class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
                   track.name.replaceAll('-', ' ') }}</span>
 
               <ul class="flex">
@@ -70,7 +74,7 @@ import { ref } from 'vue'
 
 export default {
   setup() {
-    const sprite = {
+    const audioSource = {
       'src': [
         '../assets/sprites/drums.webm',
         '../assets/sprites/drums.mp3'
@@ -224,6 +228,8 @@ export default {
       }
     })
 
+    const samples = ref([])
+
     const pattern = ref([
       {
         name: 'Closed-Hihat-01',
@@ -317,8 +323,10 @@ export default {
       timer.updateInterval((60000 / playback.value.bpm.value) / 4)
     }
 
-    const howl = new Howl(sprite)
+    const howl = new Howl(audioSource)
     const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
+
+    samples.value = Object.keys(audioSource.sprite)
 
     return {
       playback,
@@ -328,7 +336,8 @@ export default {
       updateTempo,
       updateInterval,
       filters,
-      pattern
+      pattern,
+      samples
     }
   }
 }
