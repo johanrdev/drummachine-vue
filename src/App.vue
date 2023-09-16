@@ -13,11 +13,12 @@
             <button class="w-full md:w-10 h-10 block border rounded select-none" @click="filters.reverse">
               <font-awesome-icon :icon="['fas', 'arrows-rotate']"></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 block border rounded select-none" @click="filters.sort">
-              <font-awesome-icon :icon="['fas', filters.dir === 'asc' ? 'arrow-down-z-a' : 'arrow-down-a-z']"></font-awesome-icon>
+            <button class="w-full md:w-10 h-10 block border rounded select-none" @click="filters.shuffle">
+              <font-awesome-icon :icon="['fas', 'shuffle']"></font-awesome-icon>
             </button>
-            <button class="w-full md:w-10 h-10 block border rounded select-none">
-              <!-- <font-awesome-icon :icon="['fas', 'arrows-rotate']"></font-awesome-icon> -->
+            <button class="w-full md:w-10 h-10 block border rounded select-none" @click="filters.sort">
+              <font-awesome-icon
+                :icon="['fas', filters.dir === 'asc' ? 'arrow-down-z-a' : 'arrow-down-a-z']"></font-awesome-icon>
             </button>
           </div>
           <div class="md:col-start-2 flex justify-center gap-1">
@@ -235,6 +236,17 @@ export default {
     const filters = ref({
       dir: 'asc',
       reverse: () => pattern.value.reverse(),
+      shuffle: () => {
+        let currentIndex = pattern.value.length
+        let randomIndex
+
+        while (currentIndex != 0) {
+          randomIndex = Math.floor(Math.random() * currentIndex)
+          currentIndex--
+
+          [pattern.value[currentIndex], pattern.value[randomIndex]] = [pattern.value[randomIndex], pattern.value[currentIndex]]
+        }
+      },
       sort: () => {
         if (filters.value.dir === 'asc') {
           pattern.value.sort((a, b) => a.name < b.name)
