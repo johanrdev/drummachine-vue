@@ -76,8 +76,8 @@
                       class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
                         track.name }}</span>
 
-                    <ul class="flex">
-                      <li v-for="(_, noteIndex) in track.notes" class="flex mb-1 mr-1 last:mr-0">
+                    <transition-group appear tag="ul" :css="false" @before-enter="beforeEnter" @enter="enter" class="flex">
+                      <li v-for="(_, noteIndex) in track.notes" :data-index="noteIndex" :key="noteIndex" class="flex mb-1 mr-1 last:mr-0">
                         <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
                           class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
                           :class="{
@@ -85,7 +85,7 @@
                             'bg-slate-100': noteIndex % 4 === 0,
                           }" :false-value="0" :true-value="1" @keydown.prevent />
                       </li>
-                    </ul>
+                    </transition-group>
                   </li>
                 </ul>
                 <span ref="scrollTargetBottom"></span>
@@ -106,6 +106,7 @@ import { Howl } from 'howler'
 import Timer from './classes/Timer'
 import { ref, computed, watch, onMounted } from 'vue'
 import { uuid } from 'vue-uuid'
+import gsap from 'gsap'
 
 export default {
   setup() {
@@ -444,6 +445,18 @@ export default {
       }
     })
 
+    const beforeEnter = (el) => {
+      el.style.opacity = 0
+    }
+
+    const enter = (el, done) => {
+      gsap.to(el, {
+        opacity: 1,
+        delay: 0.075 * el.dataset.index,
+        onComplete: done
+      })
+    }
+
     const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())).sort((a, b) => a.name > b.name))
     const howl = new Howl(audioSource)
     const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
@@ -476,7 +489,9 @@ export default {
       scrollTargetLeft,
       scrollTargetTop,
       scrollTargetRight,
-      scrollTargetBottom
+      scrollTargetBottom,
+      beforeEnter,
+      enter
     }
   }
 }
