@@ -1,6 +1,6 @@
 <template lang="html">
-  <div class="grow min-h-[500px] max-h-[500px] flex flex-col" @drop="onDrop($event)" @dragenter.prevent
-    @dragover.prevent>
+  <div class="grow min-h-[500px] max-h-[500px] flex flex-col" @drop="onDrop($event)" @dragenter.prevent @dragover.prevent
+    @contextmenu.prevent>
     <transition appear name="fade" mode="out-in" tag="div" class="overflow-auto grow flex">
       <div v-if="audioStore.pattern.length">
         <span ref="scrollTargetLeft"></span>
@@ -10,7 +10,8 @@
             <li v-for="(track, trackIndex) in audioStore.pattern" :key="track.id" :id="track.id" class="flex"
               draggable="true" @dragstart="useStartDrag($event, track)">
               <span :id="track.id"
-                class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
+                class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded"
+                @contextmenu="contextMenu.open($event, trackIndex)">{{
                   track.name }}</span>
 
               <transition-group appear tag="ul" :css="false" @before-enter="beforeEnter" @enter="enter" class="flex">
@@ -29,6 +30,9 @@
           <span ref="scrollTargetBottom"></span>
         </div>
         <span ref="scrollTargetRight"></span>
+
+        <context-menu :show="contextMenu.show" :position="contextMenu.position"
+          @close-context-menu="contextMenu.show = false">context menu</context-menu>
       </div>
       <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
         <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
@@ -41,14 +45,28 @@ import gsap from 'gsap'
 import { ref, watch } from 'vue'
 import { useAudioStore } from '../stores/audioStore'
 import useStartDrag from '../composables/useStartDrag'
+import ContextMenu from './ContextMenu.vue'
 
 export default {
+  components: { ContextMenu },
   setup() {
     const audioStore = useAudioStore()
     const scrollTargetLeft = ref(null)
     const scrollTargetTop = ref(null)
     const scrollTargetRight = ref(null)
     const scrollTargetBottom = ref(null)
+
+    const contextMenu = ref({
+      show: false,
+      offset: 20,
+      position: { x: 0, y: 0 },
+      open: (event, index) => {
+        contextMenu.value.show = true
+        contextMenu.value.index = index
+        contextMenu.value.position.x = event.pageX - contextMenu.value.offset
+        contextMenu.value.position.y = event.pageY - contextMenu.value.offset
+      }
+    })
 
     const onDrop = (event) => {
       const id = event.dataTransfer.getData('id')
@@ -67,6 +85,7 @@ export default {
             audioStore.pattern[sourceIndex]
           ]
       }
+
       // Add/remove
       if (sample) {
         const index = audioStore.samples.findIndex(s => s.id === id)
@@ -78,7 +97,7 @@ export default {
     const beforeEnter = (el) => {
       el.style.opacity = 0
     }
-    
+
     const enter = (el, done) => {
       gsap.to(el, {
         opacity: 1,
@@ -86,7 +105,6 @@ export default {
         onComplete: done
       })
     }
-
     const beforeLeave = (el) => {
       const { marginLeft, marginTop, width, height } = window.getComputedStyle(el)
       el.style.left = `${el.offsetLeft - parseFloat(marginLeft, 10)}px`
@@ -96,8 +114,7 @@ export default {
     }
 
     watch(() => audioStore.playback.beat.value, (val) => {
-      if (val == null || val == undefined)
-        return
+      if (val == null || val == undefined) return
       if (val > audioStore.playback.beat.max / 2) {
         scrollTargetRight.value?.scrollIntoView({ behavior: 'smooth' })
       } else {
@@ -107,14 +124,13 @@ export default {
 
     watch(() => audioStore.pattern.length, (newVal, oldVal) => {
       if (!newVal || !oldVal) return
-
       if (newVal > oldVal) {
         setTimeout(() => scrollTargetBottom.value?.scrollIntoView({ behavior: 'smooth' }), 250)
       } else {
         setTimeout(() => scrollTargetTop.value?.scrollIntoView({ behavior: 'smooth' }), 250)
       }
     })
-    
+
     const initialScrollWatch = watch(() => scrollTargetLeft.value, (val) => {
       if (val) {
         scrollTargetLeft.value?.scrollIntoView({ behavior: 'smooth' })
@@ -129,12 +145,13 @@ export default {
       scrollTargetTop,
       scrollTargetRight,
       scrollTargetBottom,
+      contextMenu,
       onDrop,
       beforeEnter,
       enter,
       beforeLeave,
       useStartDrag
-    }
+    };
   }
 }
 </script>
