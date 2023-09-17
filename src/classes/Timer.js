@@ -15,8 +15,6 @@ export default class Timer {
     this.stop()
     this.time = Date.now() + this.interval
     this.timeout = setTimeout(this.repeat, this.interval)
-
-    console.log(this.running)
   }
 
   stop = () => {
