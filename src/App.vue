@@ -7,7 +7,7 @@
       <div class="md:col-span-3 order-1 md:order-0">
         <ul class="max-h-80 overflow-y-auto">
           <li v-for="sample in samples" class="mb-1 last:mb-0">
-            <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500">{{ sample }}</div>
+            <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move" @click="preview(sample)">{{ sample }}</div>
           </li>
         </ul>
       </div>
@@ -323,6 +323,10 @@ export default {
       timer.updateInterval((60000 / playback.value.bpm.value) / 4)
     }
 
+    const preview = (sample) => {
+      howl.play(sample)
+    }
+
     const howl = new Howl(audioSource)
     const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
 
@@ -337,7 +341,8 @@ export default {
       updateInterval,
       filters,
       pattern,
-      samples
+      samples,
+      preview
     }
   }
 }
