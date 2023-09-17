@@ -32,7 +32,13 @@
         <span ref="scrollTargetRight"></span>
 
         <context-menu :show="contextMenu.show" :position="contextMenu.position"
-          @close-context-menu="contextMenu.show = false">context menu</context-menu>
+          @close-context-menu="contextMenu.show = false">
+          <ul>
+            <li class="flex flex-col grow"><button class="text-slate-500 hover:text-slate-300 rounded transition-all py-1 uppercase tracking-widest text-xs" @click="contextMenu.actions.copy">Copy</button></li>
+            <li class="flex flex-col grow"><button class="text-slate-500 hover:text-slate-300 rounded transition-all py-1 uppercase tracking-widest text-xs" @click="contextMenu.actions.paste">Paste</button></li>
+            <li class="flex flex-col grow"><button class="text-slate-500 hover:text-slate-300 rounded transition-all py-1 uppercase tracking-widest text-xs" @click="contextMenu.actions.clear">Clear</button></li>
+          </ul>
+        </context-menu>
       </div>
       <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
         <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
@@ -59,12 +65,27 @@ export default {
     const contextMenu = ref({
       show: false,
       offset: 20,
+      copy: { index: -1, data: [] },
       position: { x: 0, y: 0 },
       open: (event, index) => {
         contextMenu.value.show = true
-        contextMenu.value.index = index
         contextMenu.value.position.x = event.pageX - contextMenu.value.offset
         contextMenu.value.position.y = event.pageY - contextMenu.value.offset
+        contextMenu.value.copy.index = index
+      },
+      actions: {
+        copy: () => {
+          contextMenu.value.show = false
+          contextMenu.value.copy.data = audioStore.pattern[contextMenu.value.copy.index].notes
+        },
+        paste: () => {
+          contextMenu.value.show = false
+          audioStore.pattern[contextMenu.value.copy.index].notes = [...contextMenu.value.copy.data]
+        },
+        clear: () => {
+          contextMenu.value.show = false
+          audioStore.pattern[contextMenu.value.copy.index].notes = Array(16).fill(0)
+        }
       }
     })
 
