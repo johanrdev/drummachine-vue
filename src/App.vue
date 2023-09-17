@@ -12,7 +12,8 @@
           <ul class="overflow-y-auto grow" v-if="getSamples.length">
             <li v-for="sample in getSamples" class="mb-1 last:mb-0" draggable="true"
               @dragstart="startDrag($event, sample)">
-              <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move select-none flex justify-between items-center"
+              <div
+                class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move select-none flex justify-between items-center"
                 @click="preview(sample)">
                 <span>{{ sample.name }}</span>
                 <font-awesome-icon :icon="['fas', 'drum']" v-if="sample.previewing"></font-awesome-icon>
@@ -54,29 +55,33 @@
           <div class="md-col-start-3 md:flex justify-end gap-1 hidden">
             <label for="bpm" class="flex">
               <input type="number" id="bpm" v-model="playback.bpm.value" :min="playback.bpm.min" :max="playback.bpm.max"
-                class="px-2 text-2xl font-semibold rounded w-24 bg-slate-100 text-slate-500 outline-none"
-                @input="updateInterval" @change="updateTempo" @focus.native="$event.target.select()" />
+                class="px-2 text-2xl rounded w-24 bg-slate-100 text-slate-500 outline-none" @input="updateInterval"
+                @change="updateTempo" @focus.native="$event.target.select()" />
             </label>
           </div>
         </nav>
         <div class="h-80 flex flex-col" @drop="onDropToPattern($event)" @dragenter.prevent @dragover.prevent>
-          <ul class="overflow-auto flex flex-col" v-if="pattern.length">
-            <li v-for="(track, trackIndex) in pattern" :id="track.id" class="flex" draggable="true"
-              @dragstart="startDrag($event, track)">
-              <span :id="track.id"
-                class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
-                  track.name.replaceAll('-', ' ') }}</span>
+          <div class="overflow-auto flex grow" v-if="pattern.length">
+            <span ref="scrollTargetStart"></span>
+            <ul class="flex flex-col">
+              <li v-for="(track, trackIndex) in pattern" :id="track.id" class="flex" draggable="true"
+                @dragstart="startDrag($event, track)">
+                <span :id="track.id"
+                  class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
+                    track.name }}</span>
 
-              <ul class="flex">
-                <li v-for="(_, noteIndex) in track.notes" class="flex mb-1 mr-1 last:mr-0">
-                  <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
-                    class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
-                    :class="{ 'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1 }"
-                    :false-value="0" :true-value="1" @keydown.prevent />
-                </li>
-              </ul>
-            </li>
-          </ul>
+                <ul class="flex">
+                  <li v-for="(_, noteIndex) in track.notes" class="flex mb-1 mr-1 last:mr-0">
+                    <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
+                      class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
+                      :class="{ 'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1 }"
+                      :false-value="0" :true-value="1" @keydown.prevent />
+                  </li>
+                </ul>
+              </li>
+            </ul>
+            <span ref="scrollTargetEnd"></span>
+          </div>
           <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
             <span class="text-slate-400 mx-4">Drag samples here to add them</span>
           </div>
@@ -88,7 +93,7 @@
 <script>
 import { Howl } from 'howler'
 import Timer from './classes/Timer'
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { uuid } from 'vue-uuid'
 
 export default {
@@ -251,6 +256,9 @@ export default {
 
     const pattern = ref([])
 
+    const scrollTargetStart = ref(null)
+    const scrollTargetEnd = ref(null)
+
     const filters = ref({
       dir: 'asc',
       reverse: () => pattern.value.reverse(),
@@ -262,6 +270,7 @@ export default {
           randomIndex = Math.floor(Math.random() * currentIndex)
           currentIndex--
 
+          // Swap
           [
             pattern.value[currentIndex],
             pattern.value[randomIndex]
@@ -292,7 +301,7 @@ export default {
 
       pattern.value.forEach((track) => {
         if (track.notes[playback.value.beat.value] === 1) {
-          howl.play(track.name)
+          howl.play(track.slug)
         }
       })
 
@@ -340,7 +349,7 @@ export default {
 
     const preview = (sample) => {
       sample.howl = new Howl(audioSource)
-      sample.howl.play(sample.name)
+      sample.howl.play(sample.slug)
       sample.howl.on('play', () => sample.previewing = true)
       sample.howl.on('end', () => sample.previewing = false)
       delete sample.howl
@@ -358,10 +367,10 @@ export default {
       const sourceIndex = pattern.value.findIndex(t => t.id === id)
       const targetIndex = pattern.value.findIndex(t => t.id === event.target.id)
 
-      // Swap
       if (pattern.value.find(t => t.id === id)) {
         if (!event.target.id) return
 
+        // Swap
         [
           pattern.value[sourceIndex],
           pattern.value[targetIndex]
@@ -391,6 +400,25 @@ export default {
       }
     }
 
+    watch(() => playback.value.beat.value, (val) => {
+      if (val == null || val == undefined) return
+
+      if (val > playback.value.beat.max / 2) {
+        scrollTargetEnd.value?.scrollIntoView({ behavior: 'smooth' })
+      } else {
+        scrollTargetStart.value?.scrollIntoView({ behavior: 'instant' })
+      }
+    })
+
+    const initialScrollWatch = watch(() => scrollTargetStart.value, (val) => {
+      if (val) {
+        scrollTargetStart.value?.scrollIntoView({ behavior: 'smooth' })
+
+        // Remove the watcher
+        initialScrollWatch()
+      }
+    })
+
     const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())).sort((a, b) => a.name > b.name))
     const howl = new Howl(audioSource)
     const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
@@ -398,7 +426,8 @@ export default {
     samples.value = Object.keys(audioSource.sprite).map((sample) => {
       return {
         id: uuid.v1(),
-        name: sample,
+        name: sample.replaceAll('-', ' '),
+        slug: sample,
         notes: Array(16).fill(0),
         previewing: false
       }
@@ -418,7 +447,9 @@ export default {
       preview,
       startDrag,
       onDropToPattern,
-      onDropToSamplesList
+      onDropToSamplesList,
+      scrollTargetStart,
+      scrollTargetEnd
     }
   }
 }
