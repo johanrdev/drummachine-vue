@@ -12,8 +12,12 @@
           <ul class="overflow-y-auto grow" v-if="getSamples.length">
             <li v-for="sample in getSamples" class="mb-1 last:mb-0" draggable="true"
               @dragstart="startDrag($event, sample)">
-              <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move select-none"
-                @click="preview(sample)">{{ sample.name }}</div>
+              <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move select-none flex justify-between items-center"
+                @click="preview(sample)">
+                <span>{{ sample.name }}</span>
+                <font-awesome-icon :icon="['fas', 'drum']" v-if="sample.previewing"></font-awesome-icon>
+                <font-awesome-icon :icon="['fas', 'music']" v-else v-show="sample.notes.includes(1)"></font-awesome-icon>
+              </div>
             </li>
           </ul>
           <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
@@ -335,7 +339,11 @@ export default {
     }
 
     const preview = (sample) => {
-      howl.play(sample.name)
+      sample.howl = new Howl(audioSource)
+      sample.howl.play(sample.name)
+      sample.howl.on('play', () => sample.previewing = true)
+      sample.howl.on('end', () => sample.previewing = false)
+      delete sample.howl
     }
 
     const startDrag = (event, item) => {
@@ -391,7 +399,8 @@ export default {
       return {
         id: uuid.v1(),
         name: sample,
-        notes: Array(16).fill(0)
+        notes: Array(16).fill(0),
+        previewing: false
       }
     })
 
