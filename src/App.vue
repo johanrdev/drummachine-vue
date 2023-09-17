@@ -49,8 +49,8 @@
             </label>
           </div>
         </nav>
-        <div class="h-80 flex flex-col">
-          <ul class="overflow-auto bg-red-500 flex p-2 flex-col" v-if="pattern.length">
+        <div class="h-80 flex flex-col" @drop="onDropAddTrack($event)" @dragenter.prevent @dragover.prevent>
+          <ul class="overflow-auto flex p-2 flex-col" v-if="pattern.length">
             <li v-for="(track, trackIndex) in pattern" class="flex">
               <span
                 class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
@@ -331,8 +331,16 @@ export default {
       event.dataTransfer.effectAllowed = 'move'
     }
 
-    const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())))
+    const onDropAddTrack = (event) => {
+      const id = event.dataTransfer.getData('id')
+      const index = samples.value.findIndex(s => s.id === id)
+      const sample = samples.value.find(s => s.id === id)
 
+      pattern.value.push(sample)
+      samples.value.splice(index, 1)
+    }
+
+    const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())))
     const howl = new Howl(audioSource)
     const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
 
@@ -356,7 +364,8 @@ export default {
       pattern,
       getSamples,
       preview,
-      startDrag
+      startDrag,
+      onDropAddTrack
     }
   }
 }
