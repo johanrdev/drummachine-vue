@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAudioStore = defineStore('audioStore', {
   state: () => ({
+    search: '',
     playback: {
       playing: false,
       bpm: {
@@ -158,7 +159,9 @@ export const useAudioStore = defineStore('audioStore', {
     }
   }),
   getters: {
-
+    getSamples: (state) => {
+      return state.samples.filter(s => s.name.toLowerCase().includes(state.search.toLowerCase())).sort((a, b) => a.name > b.name)
+    }
   },
   actions: {
 

@@ -10,13 +10,18 @@
             @dragover.prevent>
             <accordion-item :show="true" class="mb-1 md:mb-0">
               <template v-slot:toggler>
-                <font-awesome-icon :icon="['fas', 'drum']" class="mr-2"></font-awesome-icon> Samples ({{ getSamples.length
+                <font-awesome-icon :icon="['fas', 'drum']" class="mr-2"></font-awesome-icon> Samples ({{
+                  audioStore.getSamples.length
                 }})
               </template>
               <div class="p-2 flex flex-col">
-                <transition-group appear tag="ul" name="list-fade" class="h-[338px] overflow-y-auto relative"
-                  v-if="getSamples.length">
-                  <li v-for="sample in getSamples" :key="sample.id"
+                <label for="search" class="block mb-2">
+                  <input type="text" v-model="audioStore.search" class="p-2 w-full border rounded outline-none"
+                    placeholder="Search sample" />
+                </label>
+                <transition-group appear tag="ul" name="list-fade" class="h-[287px] overflow-y-auto relative"
+                  v-if="audioStore.getSamples.length">
+                  <li v-for="sample in audioStore.getSamples" :key="sample.id"
                     class="p-4 mb-1 last:mb-0 flex justify-between items-center border rounded border-slate-300 bg-slate-100 text-slate-500 select-none cursor-move overflow-hidden whitespace-nowrap"
                     @click="preview(sample)" draggable="true" @dragstart="startDrag($event, sample)">
                     {{ sample.name }}
@@ -71,8 +76,8 @@
               </button>
             </div>
             <div class="md:col-start-2 flex justify-center gap-1">
-              <button class="action-btn" :class="{ 'bg-rose-500 border-rose-700 text-white': audioStore.playback.playing }"
-                @click="toggle">
+              <button class="action-btn"
+                :class="{ 'bg-rose-500 border-rose-700 text-white': audioStore.playback.playing }" @click="toggle">
                 <font-awesome-icon :icon="['fas', 'play']" v-if="!audioStore.playback.playing"></font-awesome-icon>
                 <font-awesome-icon :icon="['fas', 'pause']" v-else></font-awesome-icon>
               </button>
@@ -181,7 +186,6 @@ export default {
         filters.value.dir = filters.value.dir === 'asc' ? 'desc' : 'asc';
       }
     })
-    const term = ref('')
     const repeat = () => {
       if (audioStore.playback.beat.value >= audioStore.playback.beat.max) {
         audioStore.playback.beat.value = 0
@@ -313,7 +317,6 @@ export default {
       el.style.width = width
       el.style.height = height
     }
-    const getSamples = computed(() => audioStore.samples.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())).sort((a, b) => a.name > b.name))
     const howl = new Howl(audioStore.audioSource)
     const timer = new Timer(repeat, (60000 / audioStore.playback.bpm.value) / 4)
     audioStore.samples = Object.keys(audioStore.audioSource.sprite).map((sample) => {
@@ -333,8 +336,6 @@ export default {
       updateTempo,
       updateInterval,
       filters,
-      term,
-      getSamples,
       preview,
       startDrag,
       onDropToPattern,
