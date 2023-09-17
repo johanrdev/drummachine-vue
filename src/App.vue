@@ -69,7 +69,7 @@
               <span ref="scrollTargetLeft"></span>
               <div class="flex flex-col">
                 <span ref="scrollTargetTop"></span>
-                <transition-group appear tag="ul" name="list-fade" class="flex flex-col relative">
+                <transition-group appear tag="ul" name="list-fade" @before-leave="beforeLeave" class="flex flex-col relative">
                   <li v-for="(track, trackIndex) in pattern" :key="track.id" :id="track.id" class="flex" draggable="true"
                     @dragstart="startDrag($event, track)">
                     <span :id="track.id"
@@ -426,16 +426,16 @@ export default {
       }
     })
 
-    // watch(() => pattern.value.length, (newVal, oldVal) => {
-    //   if (!newVal || !oldVal) return
+    watch(() => pattern.value.length, (newVal, oldVal) => {
+      if (!newVal || !oldVal) return
 
-    //   if (newVal > oldVal) {
-    //     setTimeout(() => scrollTargetBottom.value?.scrollIntoView({ behavior: 'smooth' }), 250)
-    //   }
-    //   else {
-    //     setTimeout(() => scrollTargetTop.value?.scrollIntoView({ behavior: 'smooth' }), 250)
-    //   }
-    // })
+      if (newVal > oldVal) {
+        setTimeout(() => scrollTargetBottom.value?.scrollIntoView({ behavior: 'smooth' }), 250)
+      }
+      else {
+        setTimeout(() => scrollTargetTop.value?.scrollIntoView({ behavior: 'smooth' }), 250)
+      }
+    })
 
     const initialScrollWatch = watch(() => scrollTargetLeft.value, (val) => {
       if (val) {
@@ -456,6 +456,15 @@ export default {
         delay: 0.075 * el.dataset.index,
         onComplete: done
       })
+    }
+
+    const beforeLeave = (el) => {
+      const { marginLeft, marginTop, width, height } = window.getComputedStyle(el)
+
+      el.style.left = `${el.offsetLeft - parseFloat(marginLeft, 10)}px`
+      el.style.top = `${el.offsetTop - parseFloat(marginTop, 10)}px`
+      el.style.width = width
+      el.style.height = height
     }
 
     const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())).sort((a, b) => a.name > b.name))
@@ -492,7 +501,8 @@ export default {
       scrollTargetRight,
       scrollTargetBottom,
       beforeEnter,
-      enter
+      enter,
+      beforeLeave
     }
   }
 }
