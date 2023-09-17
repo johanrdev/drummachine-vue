@@ -10,7 +10,7 @@
         </label>
         <ul class="max-h-80 overflow-y-auto">
           <li v-for="sample in getSamples" class="mb-1 last:mb-0">
-            <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move" @click="preview(sample)">{{ sample }}</div>
+            <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move" @click="preview(sample)">{{ sample.name }}</div>
           </li>
         </ul>
       </div>
@@ -233,20 +233,7 @@ export default {
 
     const samples = ref([])
 
-    const pattern = ref([
-      {
-        name: 'Closed-Hihat-01',
-        notes: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1]
-      },
-      {
-        name: 'Snare-01',
-        notes: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
-      },
-      {
-        name: 'Kick-02',
-        notes: [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0]
-      }
-    ])
+    const pattern = ref([])
 
     const filters = ref({
       dir: 'asc',
@@ -329,15 +316,21 @@ export default {
     }
 
     const preview = (sample) => {
-      howl.play(sample)
+      howl.play(sample.name)
     }
 
-    const getSamples = computed(() => samples.value.filter(s => s.toLowerCase().includes(term.value.toLowerCase())))
+    const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())))
 
     const howl = new Howl(audioSource)
     const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
 
-    samples.value = Object.keys(audioSource.sprite)
+    samples.value = Object.keys(audioSource.sprite).map((sample, index) => {
+      return {
+        index,
+        name: sample,
+        notes: Array(16).fill(0)
+      }
+    })
 
     return {
       playback,
