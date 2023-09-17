@@ -48,8 +48,8 @@
             </label>
           </div>
         </nav>
-        <div>
-          <ul class="overflow-auto h-80 flex flex-col">
+        <div class="h-80 flex flex-col">
+          <ul class="overflow-auto bg-red-500 flex p-2 flex-col" v-if="pattern.length">
             <li v-for="(track, trackIndex) in pattern" class="flex">
               <span
                 class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
@@ -65,6 +65,9 @@
               </ul>
             </li>
           </ul>
+          <div class="border-2 border-dashed border-slate-300 rounded-xl grow flex flex-col justify-center items-center" v-else>
+            <span class="text-slate-500">No tracks</span>
+          </div>
         </div>
       </div>
     </section>
