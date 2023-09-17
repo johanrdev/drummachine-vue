@@ -1,5 +1,4 @@
 <template lang="html">
-  <div class="flex flex-col md:col-span-3 order-1 md:order-0">
     <transition appear name="fade" mode="out-in" tag="div" @drop="onDrop($event)" @dragenter.prevent @dragover.prevent>
       <accordion-item :show="true" class="mb-1 md:mb-0">
         <template v-slot:toggler>
@@ -23,27 +22,6 @@
         </div>
       </accordion-item>
     </transition>
-    <transition appear name="fade" mode="out-in" tag="div" class="md:hidden">
-      <accordion-item :show="true">
-        <template v-slot:toggler>
-          <font-awesome-icon :icon="['fas', 'gear']" class="mr-2"></font-awesome-icon> Settings
-        </template>
-        <div class="p-2">
-          <dl class="flex items-center text-slate-500">
-            <dt class="grow">
-              <label for="bpm">BPM:</label>
-            </dt>
-            <dd>
-              <input type="number" id="bpm" v-model="audioStore.playback.bpm.value" :min="audioStore.playback.bpm.min"
-                :max="audioStore.playback.bpm.max"
-                class="px-2 border rounded w-24 bg-slate-100 text-slate-500 outline-none" @input="updateInterval"
-                @change="updateTempo" @focus.native="$event.target.select()" />
-            </dd>
-          </dl>
-        </div>
-      </accordion-item>
-    </transition>
-  </div>
 </template>
 <script>
 import { useAudioStore } from '../stores/audioStore'

@@ -5,11 +5,14 @@
         <span class="block font-semibold text-slate-200 text-2xl text-center select-none§">GrooveBox</span>
       </header>
       <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
-        <samples-list></samples-list>
+        <div class="flex flex-col md:col-span-3 order-1 md:order-0">
+          <samples-list></samples-list>
+          <settings-box></settings-box>
+        </div>
 
         <div class="md:col-span-9 order-0 md:order-1 flex flex-col">
           <control-panel></control-panel>
-          
+
           <drum-grid></drum-grid>
         </div>
       </section>
@@ -20,14 +23,15 @@
 import { useAudioStore } from './stores/audioStore'
 import { uuid } from 'vue-uuid'
 import SamplesList from './components/SampleList.vue'
+import SettingsBox from './components/SettingsBox.vue'
 import ControlPanel from './components/ControlPanel.vue'
 import DrumGrid from './components/DrumGrid.vue'
 
 export default {
-  components: { SamplesList, ControlPanel, DrumGrid },
+  components: { SamplesList, ControlPanel, DrumGrid, SettingsBox },
   setup() {
     const audioStore = useAudioStore()
-    
+
     audioStore.samples = Object.keys(audioStore.audioSource.sprite).map((sample) => {
       return {
         id: uuid.v1(),
