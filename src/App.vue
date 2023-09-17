@@ -9,8 +9,9 @@
           <input type="text" v-model="term" class="border rounded p-2 w-full" placeholder="Search sample" />
         </label>
         <ul class="max-h-80 overflow-y-auto">
-          <li v-for="sample in getSamples" class="mb-1 last:mb-0">
-            <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move" @click="preview(sample)">{{ sample.name }}</div>
+          <li v-for="sample in getSamples" class="mb-1 last:mb-0" draggable="true" @dragstart="startDrag($event, sample)">
+            <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move"
+              @click="preview(sample)">{{ sample.name }}</div>
           </li>
         </ul>
       </div>
@@ -65,8 +66,8 @@
               </ul>
             </li>
           </ul>
-          <div class="border-2 border-dashed border-slate-300 rounded-xl grow flex flex-col justify-center items-center" v-else>
-            <span class="text-slate-500">No tracks</span>
+          <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
+            <span class="text-slate-400 mx-4">Drag samples here to add them</span>
           </div>
         </div>
       </div>
@@ -77,6 +78,7 @@
 import { Howl } from 'howler'
 import Timer from './classes/Timer'
 import { ref, computed } from 'vue'
+import { uuid } from 'vue-uuid'
 
 export default {
   setup() {
@@ -319,7 +321,14 @@ export default {
     }
 
     const preview = (sample) => {
+      console.log(sample)
       howl.play(sample.name)
+    }
+
+    const startDrag = (event, item) => {
+      event.dataTransfer.setData('id', item.id)
+      event.dataTransfer.dropEffect = 'move'
+      event.dataTransfer.effectAllowed = 'move'
     }
 
     const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())))
@@ -327,9 +336,9 @@ export default {
     const howl = new Howl(audioSource)
     const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
 
-    samples.value = Object.keys(audioSource.sprite).map((sample, index) => {
+    samples.value = Object.keys(audioSource.sprite).map((sample) => {
       return {
-        index,
+        id: uuid.v1(),
         name: sample,
         notes: Array(16).fill(0)
       }
@@ -346,7 +355,8 @@ export default {
       term,
       pattern,
       getSamples,
-      preview
+      preview,
+      startDrag
     }
   }
 }
