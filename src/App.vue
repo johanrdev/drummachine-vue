@@ -11,8 +11,8 @@
           <label for="search" class="block mb-2">
             <input type="text" v-model="term" class="border rounded p-2 w-full" placeholder="Search sample" />
           </label>
-          <ul class="overflow-y-auto grow">
-            <li v-for="sample in getSamples" class="mb-1 last:mb-0" draggable="true"
+          <transition-group appear tag="ul" name="list-fade" class="overflow-y-auto grow relative">
+            <li v-for="sample in getSamples" :key="sample.id" class="mb-1 last:mb-0" draggable="true"
               @dragstart="startDrag($event, sample)">
               <div
                 class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move select-none flex justify-between items-center overflow-hidden whitespace-nowrap"
@@ -22,7 +22,7 @@
                 <font-awesome-icon :icon="['fas', 'music']" v-else v-show="sample.notes.includes(1)"></font-awesome-icon>
               </div>
             </li>
-          </ul>
+          </transition-group>
         </div>
         <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
           <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
@@ -69,25 +69,27 @@
               <span ref="scrollTargetLeft"></span>
               <div class="flex flex-col">
                 <span ref="scrollTargetTop"></span>
-                <ul class="flex flex-col">
-                  <li v-for="(track, trackIndex) in pattern" :id="track.id" class="flex" draggable="true"
+                <transition-group appear tag="ul" name="list-fade" class="flex flex-col relative">
+                  <li v-for="(track, trackIndex) in pattern" :key="track.id" :id="track.id" class="flex" draggable="true"
                     @dragstart="startDrag($event, track)">
                     <span :id="track.id"
                       class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
                         track.name }}</span>
 
-                    <transition-group appear tag="ul" :css="false" @before-enter="beforeEnter" @enter="enter" class="flex">
-                      <li v-for="(_, noteIndex) in track.notes" :data-index="noteIndex" :key="noteIndex" class="flex mb-1 mr-1 last:mr-0">
-                        <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
-                          class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
-                          :class="{
-                            'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1,
-                            'bg-slate-100': noteIndex % 4 === 0,
-                          }" :false-value="0" :true-value="1" @keydown.prevent />
-                      </li>
-                    </transition-group>
+                    <transition-group appear tag="ul" :css="false" @before-enter="beforeEnter" @enter="enter"
+                      class="flex">
+                  <li v-for="(_, noteIndex) in track.notes" :data-index="noteIndex" :key="noteIndex"
+                    class="flex mb-1 mr-1 last:mr-0">
+                    <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
+                      class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
+                      :class="{
+                        'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1,
+                        'bg-slate-100': noteIndex % 4 === 0,
+                      }" :false-value="0" :true-value="1" @keydown.prevent />
                   </li>
-                </ul>
+                  </transition-group>
+                  </li>
+                </transition-group>
                 <span ref="scrollTargetBottom"></span>
               </div>
               <span ref="scrollTargetRight"></span>
@@ -424,17 +426,16 @@ export default {
       }
     })
 
-    watch(() => pattern.value.length, (newVal, oldVal) => {
-      if (!newVal || !oldVal) return
+    // watch(() => pattern.value.length, (newVal, oldVal) => {
+    //   if (!newVal || !oldVal) return
 
-      if (newVal > oldVal) {
-        setTimeout(() => scrollTargetBottom.value?.scrollIntoView({ behavior: 'smooth' }), 250)
-      }
-      else {
-        setTimeout(() => scrollTargetTop.value?.scrollIntoView({ behavior: 'smooth' }), 250)
-      }
-
-    })
+    //   if (newVal > oldVal) {
+    //     setTimeout(() => scrollTargetBottom.value?.scrollIntoView({ behavior: 'smooth' }), 250)
+    //   }
+    //   else {
+    //     setTimeout(() => scrollTargetTop.value?.scrollIntoView({ behavior: 'smooth' }), 250)
+    //   }
+    // })
 
     const initialScrollWatch = watch(() => scrollTargetLeft.value, (val) => {
       if (val) {
@@ -503,23 +504,7 @@ export default {
   font-family: 'Poppins';
 }
 
-.slide-in-from-left-enter-from,
-.slide-in-from-left-leave-to {
-  opacity: 0;
-  transform: translateX(-100px)
-}
-
-/* .slide-in-from-left-enter-to,
-.slide-in-from-left-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-} */
-
-.slide-in-from-left-enter-active,
-.slide-in-from-left-leave-active {
-  transition: all .75s ease-in-out;
-}
-
+/* Transition - Fade */
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -528,5 +513,27 @@ export default {
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity .4s ease-in-out;
+}
+
+/* Transition - Fade List */
+.list-fade-enter-from,
+.list-fade-leave-to {
+  opacity: 0;
+}
+
+.list-fade-move,
+.list-fade-enter-active,
+.list-fade-leave-active {
+  transition: all .4s ease-in-out;
+}
+
+.list-fade-enter-to,
+.list-fade-leave-from {
+  opacity: 1;
+}
+
+.list-fade-leave-active {
+  position: absolute;
+  width: 100%;
 }
 </style>
