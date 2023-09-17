@@ -373,10 +373,17 @@ export default {
     }
 
     const onDropToSamplesList = (event) => {
-      console.log('drop to samples list')
+      const id = event.dataTransfer.getData('id')
+      const track = pattern.value.find(t => t.id === id)
+
+      if (track) {
+        const index = pattern.value.findIndex(t => t.id === id)
+        samples.value.push(track)
+        pattern.value.splice(index, 1)
+      }
     }
 
-    const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())))
+    const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())).sort((a, b) => a.name > b.name))
     const howl = new Howl(audioSource)
     const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
 
