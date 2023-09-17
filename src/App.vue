@@ -4,8 +4,9 @@
       <span class="block font-semibold text-slate-200 text-2xl text-center select-none§">GrooveBox</span>
     </header>
     <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
-      <transition appear name="fade" mode="out-in" tag="div" class="h-[396px] flex flex-col md:col-span-3 order-1 md:order-0"
-        @drop="onDropToSamplesList($event)" @dragenter.prevent @dragover.prevent>
+      <transition appear name="fade" mode="out-in" tag="div"
+        class="h-[396px] flex flex-col md:col-span-3 order-1 md:order-0" @drop="onDropToSamplesList($event)"
+        @dragenter.prevent @dragover.prevent>
         <div v-if="getSamples.length">
           <label for="search" class="block mb-2">
             <input type="text" v-model="term" class="border rounded p-2 w-full" placeholder="Search sample" />
@@ -14,7 +15,7 @@
             <li v-for="sample in getSamples" class="mb-1 last:mb-0" draggable="true"
               @dragstart="startDrag($event, sample)">
               <div
-                class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move select-none flex justify-between items-center"
+                class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move select-none flex justify-between items-center overflow-hidden whitespace-nowrap"
                 @click="preview(sample)">
                 <span>{{ sample.name }}</span>
                 <font-awesome-icon :icon="['fas', 'drum']" v-if="sample.previewing"></font-awesome-icon>
@@ -61,30 +62,35 @@
             </label>
           </div>
         </nav>
-        <div class="grow min-h-[344px] max-h-[344px] flex flex-col" @drop="onDropToPattern($event)" @dragenter.prevent @dragover.prevent>
+        <div class="grow min-h-[344px] max-h-[344px] flex flex-col" @drop="onDropToPattern($event)" @dragenter.prevent
+          @dragover.prevent>
           <transition appear name="fade" mode="out-in" tag="div" class="overflow-auto grow flex">
             <div v-if="pattern.length">
-              <span ref="scrollTargetStart"></span>
-              <ul class="flex flex-col">
-                <li v-for="(track, trackIndex) in pattern" :id="track.id" class="flex" draggable="true"
-                  @dragstart="startDrag($event, track)">
-                  <span :id="track.id"
-                    class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
-                      track.name }}</span>
+              <span ref="scrollTargetLeft"></span>
+              <div class="flex flex-col">
+                <span ref="scrollTargetTop"></span>
+                <ul class="flex flex-col">
+                  <li v-for="(track, trackIndex) in pattern" :id="track.id" class="flex" draggable="true"
+                    @dragstart="startDrag($event, track)">
+                    <span :id="track.id"
+                      class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
+                        track.name }}</span>
 
-                  <ul class="flex">
-                    <li v-for="(_, noteIndex) in track.notes" class="flex mb-1 mr-1 last:mr-0">
-                      <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
-                        class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
-                        :class="{
-                          'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1,
-                          'bg-slate-100': noteIndex % 4 === 0,
-                        }" :false-value="0" :true-value="1" @keydown.prevent />
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-              <span ref="scrollTargetEnd"></span>
+                    <ul class="flex">
+                      <li v-for="(_, noteIndex) in track.notes" class="flex mb-1 mr-1 last:mr-0">
+                        <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
+                          class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
+                          :class="{
+                            'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1,
+                            'bg-slate-100': noteIndex % 4 === 0,
+                          }" :false-value="0" :true-value="1" @keydown.prevent />
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+                <span ref="scrollTargetBottom"></span>
+              </div>
+              <span ref="scrollTargetRight"></span>
             </div>
             <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
               <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
@@ -261,8 +267,10 @@ export default {
 
     const pattern = ref([])
 
-    const scrollTargetStart = ref(null)
-    const scrollTargetEnd = ref(null)
+    const scrollTargetLeft = ref(null)
+    const scrollTargetTop = ref(null)
+    const scrollTargetRight = ref(null)
+    const scrollTargetBottom = ref(null)
 
     const filters = ref({
       dir: 'asc',
@@ -409,17 +417,29 @@ export default {
       if (val == null || val == undefined) return
 
       if (val > playback.value.beat.max / 2) {
-        scrollTargetEnd.value?.scrollIntoView({ behavior: 'smooth' })
+        scrollTargetRight.value?.scrollIntoView({ behavior: 'smooth' })
       } else {
-        scrollTargetStart.value?.scrollIntoView({ behavior: 'instant' })
+        scrollTargetLeft.value?.scrollIntoView({ behavior: 'instant' })
       }
     })
 
-    const initialScrollWatch = watch(() => scrollTargetStart.value, (val) => {
-      if (val) {
-        scrollTargetStart.value?.scrollIntoView({ behavior: 'smooth' })
+    watch(() => pattern.value.length, (newVal, oldVal) => {
+      if (!newVal || !oldVal) return
 
-        // Remove the watcher
+      if (newVal > oldVal) {
+        setTimeout(() => scrollTargetBottom.value?.scrollIntoView({ behavior: 'smooth' }), 250)
+      }
+      else {
+        setTimeout(() => scrollTargetTop.value?.scrollIntoView({ behavior: 'smooth' }), 250)
+      }
+
+    })
+
+    const initialScrollWatch = watch(() => scrollTargetLeft.value, (val) => {
+      if (val) {
+        scrollTargetLeft.value?.scrollIntoView({ behavior: 'smooth' })
+
+        // Removes the watcher
         initialScrollWatch()
       }
     })
@@ -453,8 +473,10 @@ export default {
       startDrag,
       onDropToPattern,
       onDropToSamplesList,
-      scrollTargetStart,
-      scrollTargetEnd
+      scrollTargetLeft,
+      scrollTargetTop,
+      scrollTargetRight,
+      scrollTargetBottom
     }
   }
 }
