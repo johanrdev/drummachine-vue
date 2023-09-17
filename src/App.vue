@@ -4,30 +4,41 @@
       <span class="block font-semibold text-slate-200 text-2xl text-center select-none§">GrooveBox</span>
     </header>
     <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
-      <transition appear name="fade" mode="out-in" tag="div"
-        class="h-[396px] flex flex-col md:col-span-3 order-1 md:order-0" @drop="onDropToSamplesList($event)"
-        @dragenter.prevent @dragover.prevent>
-        <div v-if="getSamples.length">
-          <label for="search" class="block mb-2">
-            <input type="text" v-model="term" class="border rounded p-2 w-full" placeholder="Search sample" />
-          </label>
-          <transition-group appear tag="ul" name="list-fade" class="overflow-y-auto grow relative">
-            <li v-for="sample in getSamples" :key="sample.id" class="mb-1 last:mb-0" draggable="true"
-              @dragstart="startDrag($event, sample)">
-              <div
-                class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move select-none flex justify-between items-center overflow-hidden whitespace-nowrap"
-                @click="preview(sample)">
-                <span>{{ sample.name }}</span>
-                <font-awesome-icon :icon="['fas', 'drum']" v-if="sample.previewing"></font-awesome-icon>
-                <font-awesome-icon :icon="['fas', 'music']" v-else v-show="sample.notes.includes(1)"></font-awesome-icon>
+      <div class="flex flex-col md:col-span-3 order-1 md:order-0">
+        <transition appear name="fade" mode="out-in" tag="div" @drop="onDropToSamplesList($event)" @dragenter.prevent
+          @dragover.prevent>
+          <accordion-item :show="true" class="mb-1 md:mb-0">
+            <template v-slot:toggler>
+              <font-awesome-icon :icon="['fas', 'drum']" class="mr-2"></font-awesome-icon> Samples ({{ getSamples.length }})
+            </template>
+            <div class="p-2 flex flex-col">
+              <transition-group appear tag="ul" name="list-fade" class="h-[338px] overflow-y-auto relative" v-if="getSamples.length">
+                <li v-for="sample in getSamples" :key="sample.id"
+                  class="p-4 mb-1 last:mb-0 flex justify-between items-center border rounded border-slate-300 bg-slate-100 text-slate-500 select-none cursor-move overflow-hidden whitespace-nowrap"
+                  @click="preview(sample)" draggable="true" @dragstart="startDrag($event, sample)">
+                  {{ sample.name }}
+
+                  <font-awesome-icon :icon="['fas', 'drum']" v-if="sample.previewing"></font-awesome-icon>
+                  <font-awesome-icon :icon="['fas', 'music']" v-show="sample.notes.includes(1)"
+                    v-else></font-awesome-icon>
+                </li>
+              </transition-group>
+              <div class="p-2 border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center h-[338px]" v-else>
+                <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
               </div>
-            </li>
-          </transition-group>
-        </div>
-        <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
-          <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
-        </div>
-      </transition>
+            </div>
+          </accordion-item>
+        </transition>
+        <transition appear name="fade" mode="out-in" tag="div" class="md:hidden">
+          <accordion-item :show="true">
+            <template v-slot:toggler>
+              <font-awesome-icon :icon="['fas', 'gear']" class="mr-2"></font-awesome-icon> Settings
+            </template>
+            <span class="block p-2">Settings</span>
+          </accordion-item>
+        </transition>
+      </div>
+
       <div class="md:col-span-9 order-0 md:order-1 flex flex-col">
         <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
           <div class="md-col-start-1 md:flex justify-start gap-1 hidden">
@@ -57,7 +68,7 @@
           <div class="md-col-start-3 md:flex justify-end gap-1 hidden">
             <label for="bpm" class="flex">
               <input type="number" id="bpm" v-model="playback.bpm.value" :min="playback.bpm.min" :max="playback.bpm.max"
-                class="px-2 text-2xl rounded w-24 bg-slate-100 text-slate-500 outline-none" @input="updateInterval"
+                class="px-2 text-2xl border rounded w-24 bg-slate-100 text-slate-500 outline-none" @input="updateInterval"
                 @change="updateTempo" @focus.native="$event.target.select()" />
             </label>
           </div>
@@ -69,7 +80,8 @@
               <span ref="scrollTargetLeft"></span>
               <div class="flex flex-col">
                 <span ref="scrollTargetTop"></span>
-                <transition-group appear tag="ul" name="list-fade" @before-leave="beforeLeave" class="flex flex-col relative">
+                <transition-group appear tag="ul" name="list-fade" @before-leave="beforeLeave"
+                  class="flex flex-col relative">
                   <li v-for="(track, trackIndex) in pattern" :key="track.id" :id="track.id" class="flex" draggable="true"
                     @dragstart="startDrag($event, track)">
                     <span :id="track.id"
@@ -87,8 +99,8 @@
                         'bg-slate-100': noteIndex % 4 === 0,
                       }" :false-value="0" :true-value="1" @keydown.prevent />
                   </li>
-                  </transition-group>
-                  </li>
+                </transition-group>
+                </li>
                 </transition-group>
                 <span ref="scrollTargetBottom"></span>
               </div>
@@ -109,6 +121,7 @@ import Timer from './classes/Timer'
 import { ref, computed, watch, onMounted } from 'vue'
 import { uuid } from 'vue-uuid'
 import gsap from 'gsap'
+import AccordionItem from './components/AccordionItem.vue'
 
 export default {
   setup() {
@@ -251,8 +264,7 @@ export default {
           1191.519274376418
         ]
       }
-    }
-
+    };
     const playback = ref({
       playing: false,
       bpm: {
@@ -264,28 +276,22 @@ export default {
         value: 0,
         max: 16
       }
-    })
-
-    const samples = ref([])
-
-    const pattern = ref([])
-
-    const scrollTargetLeft = ref(null)
-    const scrollTargetTop = ref(null)
-    const scrollTargetRight = ref(null)
-    const scrollTargetBottom = ref(null)
-
+    });
+    const samples = ref([]);
+    const pattern = ref([]);
+    const scrollTargetLeft = ref(null);
+    const scrollTargetTop = ref(null);
+    const scrollTargetRight = ref(null);
+    const scrollTargetBottom = ref(null);
     const filters = ref({
       dir: 'asc',
       reverse: () => pattern.value.reverse(),
       shuffle: () => {
-        let currentIndex = pattern.value.length
-        let randomIndex
-
+        let currentIndex = pattern.value.length;
+        let randomIndex;
         while (currentIndex != 0) {
-          randomIndex = Math.floor(Math.random() * currentIndex)
-          currentIndex--
-
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex--;
           // Swap
           [
             pattern.value[currentIndex],
@@ -294,98 +300,84 @@ export default {
             [
               pattern.value[randomIndex],
               pattern.value[currentIndex]
-            ]
+            ];
         }
       },
       sort: () => {
         if (filters.value.dir === 'asc') {
-          pattern.value.sort((a, b) => a.name < b.name)
-        } else {
-          pattern.value.sort((a, b) => a.name > b.name)
+          pattern.value.sort((a, b) => a.name < b.name);
         }
-
-        filters.value.dir = filters.value.dir === 'asc' ? 'desc' : 'asc'
+        else {
+          pattern.value.sort((a, b) => a.name > b.name);
+        }
+        filters.value.dir = filters.value.dir === 'asc' ? 'desc' : 'asc';
       }
-    })
-
-    const term = ref('')
-
+    });
+    const term = ref('');
     const repeat = () => {
       if (playback.value.beat.value >= playback.value.beat.max) {
-        playback.value.beat.value = 0
+        playback.value.beat.value = 0;
       }
-
       pattern.value.forEach((track) => {
         if (track.notes[playback.value.beat.value] === 1) {
-          howl.play(track.slug)
+          howl.play(track.slug);
         }
-      })
-
-      playback.value.beat.value += 1
-    }
-
+      });
+      playback.value.beat.value += 1;
+    };
     const toggle = () => {
       if (!playback.value.playing) {
-        timer.start()
-      } else {
-        timer.stop()
+        timer.start();
       }
-
-      playback.value.playing = !playback.value.playing
-    }
-
+      else {
+        timer.stop();
+      }
+      playback.value.playing = !playback.value.playing;
+    };
     const stop = () => {
-      playback.value.playing = false
-      playback.value.beat.value = 0
-      timer.stop()
-    }
-
+      playback.value.playing = false;
+      playback.value.beat.value = 0;
+      timer.stop();
+    };
     const rewind = () => {
-      playback.value.beat.value = 0
-    }
-
+      playback.value.beat.value = 0;
+    };
     const updateTempo = () => {
       if (playback.value.bpm.value < playback.value.bpm.min) {
-        playback.value.bpm.value = playback.value.bpm.min
+        playback.value.bpm.value = playback.value.bpm.min;
       }
-
       if (playback.value.bpm.value > playback.value.bpm.max) {
-        playback.value.bpm.value = playback.value.bpm.max
+        playback.value.bpm.value = playback.value.bpm.max;
       }
-
-      timer.updateInterval((60000 / playback.value.bpm.value) / 4)
-    }
-
+      timer.updateInterval((60000 / playback.value.bpm.value) / 4);
+    };
     const updateInterval = () => {
-      if (playback.value.bpm.value < playback.value.bpm.min) return
-      if (playback.value.bpm.value > playback.value.bpm.max) return
-
-      timer.updateInterval((60000 / playback.value.bpm.value) / 4)
-    }
-
+      if (playback.value.bpm.value < playback.value.bpm.min)
+        return;
+      if (playback.value.bpm.value > playback.value.bpm.max)
+        return;
+      timer.updateInterval((60000 / playback.value.bpm.value) / 4);
+    };
     const preview = (sample) => {
-      sample.howl = new Howl(audioSource)
-      sample.howl.play(sample.slug)
-      sample.howl.on('play', () => sample.previewing = true)
-      sample.howl.on('end', () => sample.previewing = false)
-      delete sample.howl
-    }
-
+      sample.howl = new Howl(audioSource);
+      sample.howl.play(sample.slug);
+      sample.howl.on('play', () => sample.previewing = true);
+      sample.howl.on('end', () => sample.previewing = false);
+      delete sample.howl;
+    };
     const startDrag = (event, item) => {
-      event.dataTransfer.setData('id', item.id)
-      event.dataTransfer.dropEffect = 'move'
-      event.dataTransfer.effectAllowed = 'move'
-    }
-
+      event.dataTransfer.setData('id', item.id);
+      event.dataTransfer.dropEffect = 'move';
+      event.dataTransfer.effectAllowed = 'move';
+    };
     const onDropToPattern = (event) => {
-      const id = event.dataTransfer.getData('id')
-      const sample = samples.value.find(s => s.id === id)
-      const sourceIndex = pattern.value.findIndex(t => t.id === id)
-      const targetIndex = pattern.value.findIndex(t => t.id === event.target.id)
-
+      const id = event.dataTransfer.getData('id');
+      const sample = samples.value.find(s => s.id === id);
+      const sourceIndex = pattern.value.findIndex(t => t.id === id);
+      const targetIndex = pattern.value.findIndex(t => t.id === event.target.id);
       if (pattern.value.find(t => t.id === id)) {
-        if (!event.target.id) return
-
+        if (!event.target.id)
+          return;
         // Swap
         [
           pattern.value[sourceIndex],
@@ -394,83 +386,71 @@ export default {
           [
             pattern.value[targetIndex],
             pattern.value[sourceIndex]
-          ]
+          ];
       }
-
       // Add/remove
       if (sample) {
-        const index = samples.value.findIndex(s => s.id === id)
-        pattern.value.push(samples.value[index])
-        samples.value.splice(index, 1)
+        const index = samples.value.findIndex(s => s.id === id);
+        pattern.value.push(samples.value[index]);
+        samples.value.splice(index, 1);
       }
-    }
-
+    };
     const onDropToSamplesList = (event) => {
-      const id = event.dataTransfer.getData('id')
-      const track = pattern.value.find(t => t.id === id)
-
+      const id = event.dataTransfer.getData('id');
+      const track = pattern.value.find(t => t.id === id);
       if (track) {
-        const index = pattern.value.findIndex(t => t.id === id)
-        samples.value.push(track)
-        pattern.value.splice(index, 1)
+        const index = pattern.value.findIndex(t => t.id === id);
+        samples.value.push(track);
+        pattern.value.splice(index, 1);
       }
-    }
-
+    };
     watch(() => playback.value.beat.value, (val) => {
-      if (val == null || val == undefined) return
-
+      if (val == null || val == undefined)
+        return;
       if (val > playback.value.beat.max / 2) {
-        scrollTargetRight.value?.scrollIntoView({ behavior: 'smooth' })
-      } else {
-        scrollTargetLeft.value?.scrollIntoView({ behavior: 'instant' })
-      }
-    })
-
-    watch(() => pattern.value.length, (newVal, oldVal) => {
-      if (!newVal || !oldVal) return
-
-      if (newVal > oldVal) {
-        setTimeout(() => scrollTargetBottom.value?.scrollIntoView({ behavior: 'smooth' }), 250)
+        scrollTargetRight.value?.scrollIntoView({ behavior: 'smooth' });
       }
       else {
-        setTimeout(() => scrollTargetTop.value?.scrollIntoView({ behavior: 'smooth' }), 250)
+        scrollTargetLeft.value?.scrollIntoView({ behavior: 'instant' });
       }
-    })
-
+    });
+    watch(() => pattern.value.length, (newVal, oldVal) => {
+      if (!newVal || !oldVal)
+        return;
+      if (newVal > oldVal) {
+        setTimeout(() => scrollTargetBottom.value?.scrollIntoView({ behavior: 'smooth' }), 250);
+      }
+      else {
+        setTimeout(() => scrollTargetTop.value?.scrollIntoView({ behavior: 'smooth' }), 250);
+      }
+    });
     const initialScrollWatch = watch(() => scrollTargetLeft.value, (val) => {
       if (val) {
-        scrollTargetLeft.value?.scrollIntoView({ behavior: 'smooth' })
-
+        scrollTargetLeft.value?.scrollIntoView({ behavior: 'smooth' });
         // Removes the watcher
-        initialScrollWatch()
+        initialScrollWatch();
       }
-    })
-
+    });
     const beforeEnter = (el) => {
-      el.style.opacity = 0
-    }
-
+      el.style.opacity = 0;
+    };
     const enter = (el, done) => {
       gsap.to(el, {
         opacity: 1,
         delay: 0.075 * el.dataset.index,
         onComplete: done
-      })
-    }
-
+      });
+    };
     const beforeLeave = (el) => {
-      const { marginLeft, marginTop, width, height } = window.getComputedStyle(el)
-
-      el.style.left = `${el.offsetLeft - parseFloat(marginLeft, 10)}px`
-      el.style.top = `${el.offsetTop - parseFloat(marginTop, 10)}px`
-      el.style.width = width
-      el.style.height = height
-    }
-
-    const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())).sort((a, b) => a.name > b.name))
-    const howl = new Howl(audioSource)
-    const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
-
+      const { marginLeft, marginTop, width, height } = window.getComputedStyle(el);
+      el.style.left = `${el.offsetLeft - parseFloat(marginLeft, 10)}px`;
+      el.style.top = `${el.offsetTop - parseFloat(marginTop, 10)}px`;
+      el.style.width = width;
+      el.style.height = height;
+    };
+    const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())).sort((a, b) => a.name > b.name));
+    const howl = new Howl(audioSource);
+    const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4);
     samples.value = Object.keys(audioSource.sprite).map((sample) => {
       return {
         id: uuid.v1(),
@@ -478,9 +458,8 @@ export default {
         slug: sample,
         notes: Array(16).fill(0),
         previewing: false
-      }
-    })
-
+      };
+    });
     return {
       playback,
       toggle,
@@ -503,8 +482,9 @@ export default {
       beforeEnter,
       enter,
       beforeLeave
-    }
-  }
+    };
+  },
+  components: { AccordionItem }
 }
 </script>
 <style lang="css">
