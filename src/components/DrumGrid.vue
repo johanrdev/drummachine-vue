@@ -1,5 +1,5 @@
 <template lang="html">
-  <div class="grow min-h-[344px] max-h-[344px] flex flex-col" @drop="onDrop($event)" @dragenter.prevent
+  <div class="grow min-h-[500px] max-h-[500px] flex flex-col" @drop="onDrop($event)" @dragenter.prevent
     @dragover.prevent>
     <transition appear name="fade" mode="out-in" tag="div" class="overflow-auto grow flex">
       <div v-if="audioStore.pattern.length">

@@ -2,7 +2,7 @@
   <transition appear name="slide-fade">
     <div class="flex flex-col max-w-7xl shadow-xl border rounded-lg overflow-hidden mx-4 my-10 xl:mx-auto lg:mt-32">
       <header class="bg-slate-400 p-3">
-        <span class="block font-semibold text-slate-200 text-2xl text-center select-none§">GrooveBox</span>
+        <span class="block font-semibold text-slate-200 text-2xl text-center select-none">GrooveBox</span>
       </header>
       <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
         <div class="flex flex-col md:col-span-3 order-1 md:order-0">
