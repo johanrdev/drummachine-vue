@@ -8,41 +8,8 @@
         <samples-list />
 
         <div class="md:col-span-9 order-0 md:order-1 flex flex-col">
-          <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
-            <div class="md-col-start-1 md:flex justify-start gap-1 hidden">
-              <button class="action-btn" @click="filters.reverse">
-                <font-awesome-icon :icon="['fas', 'arrows-rotate']"></font-awesome-icon>
-              </button>
-              <button class="action-btn" @click="filters.shuffle">
-                <font-awesome-icon :icon="['fas', 'shuffle']"></font-awesome-icon>
-              </button>
-              <button class="action-btn" @click="filters.sort">
-                <font-awesome-icon
-                  :icon="['fas', filters.dir === 'asc' ? 'arrow-down-z-a' : 'arrow-down-a-z']"></font-awesome-icon>
-              </button>
-            </div>
-            <div class="md:col-start-2 flex justify-center gap-1">
-              <button class="action-btn"
-                :class="{ 'bg-rose-500 border-rose-700 text-white': audioStore.playback.playing }" @click="toggle">
-                <font-awesome-icon :icon="['fas', 'play']" v-if="!audioStore.playback.playing"></font-awesome-icon>
-                <font-awesome-icon :icon="['fas', 'pause']" v-else></font-awesome-icon>
-              </button>
-              <button class="action-btn" @click="stop">
-                <font-awesome-icon :icon="['fas', 'stop']"></font-awesome-icon>
-              </button>
-              <button class="action-btn" @click="rewind">
-                <font-awesome-icon :icon="['fas', 'backward']"></font-awesome-icon>
-              </button>
-            </div>
-            <div class="md-col-start-3 md:flex justify-end gap-1 hidden">
-              <label for="bpm" class="flex">
-                <input type="number" id="bpm" v-model="audioStore.playback.bpm.value" :min="audioStore.playback.bpm.min"
-                  :max="audioStore.playback.bpm.max"
-                  class="px-2 text-2xl border rounded w-24 bg-slate-100 text-slate-500 outline-none"
-                  @input="updateInterval" @change="updateTempo" @focus.native="$event.target.select()" />
-              </label>
-            </div>
-          </nav>
+          <control-panel />
+          
           <div class="grow min-h-[344px] max-h-[344px] flex flex-col" @drop="onDropToPattern($event)" @dragenter.prevent
             @dragover.prevent>
             <transition appear name="fade" mode="out-in" tag="div" class="overflow-auto grow flex">
@@ -87,13 +54,12 @@
   </transition>
 </template>
 <script>
-import Timer from './classes/Timer'
 import { ref, watch } from 'vue'
-import { Howl } from 'howler'
 import { useAudioStore } from './stores/audioStore'
 import { uuid } from 'vue-uuid'
 import gsap from 'gsap'
 import SamplesList from './components/SampleList.vue'
+import ControlPanel from './components/ControlPanel.vue'
 import useStartDrag from './composables/useStartDrag'
 
 export default {
@@ -103,80 +69,6 @@ export default {
     const scrollTargetTop = ref(null)
     const scrollTargetRight = ref(null)
     const scrollTargetBottom = ref(null)
-    const filters = ref({
-      dir: 'asc',
-      reverse: () => audioStore.pattern.reverse(),
-      shuffle: () => {
-        let currentIndex = audioStore.pattern.length;
-        let randomIndex;
-        while (currentIndex != 0) {
-          randomIndex = Math.floor(Math.random() * currentIndex);
-          currentIndex--;
-          // Swap
-          [
-            audioStore.pattern[currentIndex],
-            audioStore.pattern[randomIndex]
-          ] =
-            [
-              audioStore.pattern[randomIndex],
-              audioStore.pattern[currentIndex]
-            ];
-        }
-      },
-      sort: () => {
-        if (filters.value.dir === 'asc') {
-          audioStore.pattern.sort((a, b) => a.name < b.name);
-        }
-        else {
-          audioStore.pattern.sort((a, b) => a.name > b.name);
-        }
-        filters.value.dir = filters.value.dir === 'asc' ? 'desc' : 'asc';
-      }
-    })
-    const repeat = () => {
-      if (audioStore.playback.beat.value >= audioStore.playback.beat.max) {
-        audioStore.playback.beat.value = 0
-      }
-      audioStore.pattern.forEach((track) => {
-        if (track.notes[audioStore.playback.beat.value] === 1) {
-          howl.play(track.slug)
-        }
-      });
-      audioStore.playback.beat.value += 1
-    }
-    const toggle = () => {
-      if (!audioStore.playback.playing) {
-        timer.start()
-      }
-      else {
-        timer.stop()
-      }
-      audioStore.playback.playing = !audioStore.playback.playing
-    }
-    const stop = () => {
-      audioStore.playback.playing = false
-      audioStore.playback.beat.value = 0
-      timer.stop()
-    }
-    const rewind = () => {
-      audioStore.playback.beat.value = 0
-    }
-    const updateTempo = () => {
-      if (audioStore.playback.bpm.value < audioStore.playback.bpm.min) {
-        audioStore.playback.bpm.value = audioStore.playback.bpm.min
-      }
-      if (audioStore.playback.bpm.value > audioStore.playback.bpm.max) {
-        audioStore.playback.bpm.value = audioStore.playback.bpm.max
-      }
-      timer.updateInterval((60000 / audioStore.playback.bpm.value) / 4)
-    }
-    const updateInterval = () => {
-      if (audioStore.playback.bpm.value < audioStore.playback.bpm.min)
-        return
-      if (audioStore.playback.bpm.value > audioStore.playback.bpm.max)
-        return
-      timer.updateInterval((60000 / audioStore.playback.bpm.value) / 4)
-    }
     
     const onDropToPattern = (event) => {
       const id = event.dataTransfer.getData('id')
@@ -245,8 +137,7 @@ export default {
       el.style.width = width
       el.style.height = height
     }
-    const howl = new Howl(audioStore.audioSource)
-    const timer = new Timer(repeat, (60000 / audioStore.playback.bpm.value) / 4)
+    
     audioStore.samples = Object.keys(audioStore.audioSource.sprite).map((sample) => {
       return {
         id: uuid.v1(),
@@ -258,12 +149,6 @@ export default {
     })
     return {
       audioStore,
-      toggle,
-      stop,
-      rewind,
-      updateTempo,
-      updateInterval,
-      filters,
       useStartDrag,
       onDropToPattern,
       scrollTargetLeft,
@@ -275,7 +160,7 @@ export default {
       beforeLeave
     }
   },
-  components: { SamplesList }
+  components: { SamplesList, ControlPanel }
 }
 </script>
 <style lang="css">
