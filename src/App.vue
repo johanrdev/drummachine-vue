@@ -5,8 +5,11 @@
     </header>
     <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
       <div class="md:col-span-3 order-1 md:order-0">
+        <label for="search" class="block mb-2">
+          <input type="text" v-model="term" class="border rounded p-2 w-full" placeholder="Search sample" />
+        </label>
         <ul class="max-h-80 overflow-y-auto">
-          <li v-for="sample in samples" class="mb-1 last:mb-0">
+          <li v-for="sample in getSamples" class="mb-1 last:mb-0">
             <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move" @click="preview(sample)">{{ sample }}</div>
           </li>
         </ul>
@@ -70,7 +73,7 @@
 <script>
 import { Howl } from 'howler'
 import Timer from './classes/Timer'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 export default {
   setup() {
@@ -270,6 +273,8 @@ export default {
       }
     })
 
+    const term = ref('')
+
     const repeat = () => {
       if (playback.value.beat.value >= playback.value.beat.max) {
         playback.value.beat.value = 0
@@ -327,6 +332,8 @@ export default {
       howl.play(sample)
     }
 
+    const getSamples = computed(() => samples.value.filter(s => s.toLowerCase().includes(term.value.toLowerCase())))
+
     const howl = new Howl(audioSource)
     const timer = new Timer(repeat, (60000 / playback.value.bpm.value) / 4)
 
@@ -340,8 +347,9 @@ export default {
       updateTempo,
       updateInterval,
       filters,
+      term,
       pattern,
-      samples,
+      getSamples,
       preview
     }
   }
