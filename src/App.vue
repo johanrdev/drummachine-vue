@@ -8,7 +8,7 @@
         <label for="search" class="block mb-2">
           <input type="text" v-model="term" class="border rounded p-2 w-full" placeholder="Search sample" />
         </label>
-        <div class="h-80 flex flex-col">
+        <div class="h-80 flex flex-col" @drop="onDropToSamplesList($event)" @dragenter.prevent @dragover.prevent>
           <ul class="overflow-y-auto grow" v-if="getSamples.length">
             <li v-for="sample in getSamples" class="mb-1 last:mb-0" draggable="true"
               @dragstart="startDrag($event, sample)">
@@ -55,11 +55,11 @@
             </label>
           </div>
         </nav>
-        <div class="h-80 flex flex-col" @drop="onDrop($event)" @dragenter.prevent @dragover.prevent>
+        <div class="h-80 flex flex-col" @drop="onDropToPattern($event)" @dragenter.prevent @dragover.prevent>
           <ul class="overflow-auto flex flex-col" v-if="pattern.length">
-            <li v-for="(track, trackIndex) in pattern" class="flex" draggable="true"
+            <li v-for="(track, trackIndex) in pattern" :id="track.id" class="flex" draggable="true"
               @dragstart="startDrag($event, track)">
-              <span
+              <span :id="track.id"
                 class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
                   track.name.replaceAll('-', ' ') }}</span>
 
@@ -258,7 +258,14 @@ export default {
           randomIndex = Math.floor(Math.random() * currentIndex)
           currentIndex--
 
-          [pattern.value[currentIndex], pattern.value[randomIndex]] = [pattern.value[randomIndex], pattern.value[currentIndex]]
+          [
+            pattern.value[currentIndex],
+            pattern.value[randomIndex]
+          ] =
+            [
+              pattern.value[randomIndex],
+              pattern.value[currentIndex]
+            ]
         }
       },
       sort: () => {
@@ -328,7 +335,6 @@ export default {
     }
 
     const preview = (sample) => {
-      console.log(sample)
       howl.play(sample.name)
     }
 
@@ -338,13 +344,36 @@ export default {
       event.dataTransfer.effectAllowed = 'move'
     }
 
-    const onDrop = (event) => {
+    const onDropToPattern = (event) => {
       const id = event.dataTransfer.getData('id')
-      const index = samples.value.findIndex(s => s.id === id)
       const sample = samples.value.find(s => s.id === id)
+      const sourceIndex = pattern.value.findIndex(t => t.id === id)
+      const targetIndex = pattern.value.findIndex(t => t.id === event.target.id)
 
-      pattern.value.push(sample)
-      samples.value.splice(index, 1)
+      // Swap
+      if (pattern.value.find(t => t.id === id)) {
+        if (!event.target.id) return
+
+        [
+          pattern.value[sourceIndex],
+          pattern.value[targetIndex]
+        ] =
+          [
+            pattern.value[targetIndex],
+            pattern.value[sourceIndex]
+          ]
+      }
+
+      // Add/remove
+      if (sample) {
+        const index = samples.value.findIndex(s => s.id === id)
+        pattern.value.push(samples.value[index])
+        samples.value.splice(index, 1)
+      }
+    }
+
+    const onDropToSamplesList = (event) => {
+      console.log('drop to samples list')
     }
 
     const getSamples = computed(() => samples.value.filter(s => s.name.toLowerCase().includes(term.value.toLowerCase())))
@@ -372,7 +401,8 @@ export default {
       getSamples,
       preview,
       startDrag,
-      onDrop
+      onDropToPattern,
+      onDropToSamplesList
     }
   }
 }
