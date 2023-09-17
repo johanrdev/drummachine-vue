@@ -5,61 +5,7 @@
         <span class="block font-semibold text-slate-200 text-2xl text-center select-none§">GrooveBox</span>
       </header>
       <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
-        <div class="flex flex-col md:col-span-3 order-1 md:order-0">
-          <transition appear name="fade" mode="out-in" tag="div" @drop="onDropToSamplesList($event)" @dragenter.prevent
-            @dragover.prevent>
-            <accordion-item :show="true" class="mb-1 md:mb-0">
-              <template v-slot:toggler>
-                <font-awesome-icon :icon="['fas', 'drum']" class="mr-2"></font-awesome-icon> Samples ({{
-                  audioStore.getSamples.length
-                }})
-              </template>
-              <div class="p-2 flex flex-col">
-                <label for="search" class="block mb-2">
-                  <input type="text" v-model="audioStore.search" class="p-2 w-full border rounded outline-none"
-                    placeholder="Search sample" />
-                </label>
-                <transition-group appear tag="ul" name="list-fade" class="h-[287px] overflow-y-auto relative"
-                  v-if="audioStore.getSamples.length">
-                  <li v-for="sample in audioStore.getSamples" :key="sample.id"
-                    class="p-4 mb-1 last:mb-0 flex justify-between items-center border rounded border-slate-300 bg-slate-100 text-slate-500 select-none cursor-move overflow-hidden whitespace-nowrap"
-                    @click="preview(sample)" draggable="true" @dragstart="startDrag($event, sample)">
-                    {{ sample.name }}
-
-                    <font-awesome-icon :icon="['fas', 'drum']" v-if="sample.previewing"></font-awesome-icon>
-                    <font-awesome-icon :icon="['fas', 'music']" v-show="sample.notes.includes(1)"
-                      v-else></font-awesome-icon>
-                  </li>
-                </transition-group>
-                <div
-                  class="p-2 border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center h-[338px]"
-                  v-else>
-                  <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
-                </div>
-              </div>
-            </accordion-item>
-          </transition>
-          <transition appear name="fade" mode="out-in" tag="div" class="md:hidden">
-            <accordion-item :show="true">
-              <template v-slot:toggler>
-                <font-awesome-icon :icon="['fas', 'gear']" class="mr-2"></font-awesome-icon> Settings
-              </template>
-              <div class="p-2">
-                <dl class="flex items-center text-slate-500">
-                  <dt class="grow">
-                    <label for="bpm">BPM:</label>
-                  </dt>
-                  <dd>
-                    <input type="number" id="bpm" v-model="audioStore.playback.bpm.value"
-                      :min="audioStore.playback.bpm.min" :max="audioStore.playback.bpm.max"
-                      class="px-2 border rounded w-24 bg-slate-100 text-slate-500 outline-none" @input="updateInterval"
-                      @change="updateTempo" @focus.native="$event.target.select()" />
-                  </dd>
-                </dl>
-              </div>
-            </accordion-item>
-          </transition>
-        </div>
+        <samples-list />
 
         <div class="md:col-span-9 order-0 md:order-1 flex flex-col">
           <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
@@ -107,7 +53,7 @@
                   <transition-group appear tag="ul" name="list-fade" @before-leave="beforeLeave"
                     class="flex flex-col relative">
                     <li v-for="(track, trackIndex) in audioStore.pattern" :key="track.id" :id="track.id" class="flex"
-                      draggable="true" @dragstart="startDrag($event, track)">
+                      draggable="true" @dragstart="useStartDrag($event, track)">
                       <span :id="track.id"
                         class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
                           track.name }}</span>
@@ -141,13 +87,14 @@
   </transition>
 </template>
 <script>
-import { Howl } from 'howler'
 import Timer from './classes/Timer'
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, watch } from 'vue'
+import { Howl } from 'howler'
 import { useAudioStore } from './stores/audioStore'
 import { uuid } from 'vue-uuid'
 import gsap from 'gsap'
-import AccordionItem from './components/AccordionItem.vue'
+import SamplesList from './components/SampleList.vue'
+import useStartDrag from './composables/useStartDrag'
 
 export default {
   setup() {
@@ -230,18 +177,7 @@ export default {
         return
       timer.updateInterval((60000 / audioStore.playback.bpm.value) / 4)
     }
-    const preview = (sample) => {
-      sample.howl = new Howl(audioStore.audioSource)
-      sample.howl.play(sample.slug)
-      sample.howl.on('play', () => sample.previewing = true)
-      sample.howl.on('end', () => sample.previewing = false)
-      delete sample.howl
-    }
-    const startDrag = (event, item) => {
-      event.dataTransfer.setData('id', item.id)
-      event.dataTransfer.dropEffect = 'move'
-      event.dataTransfer.effectAllowed = 'move'
-    }
+    
     const onDropToPattern = (event) => {
       const id = event.dataTransfer.getData('id')
       const sample = audioStore.samples.find(s => s.id === id)
@@ -266,15 +202,7 @@ export default {
         audioStore.samples.splice(index, 1)
       }
     }
-    const onDropToSamplesList = (event) => {
-      const id = event.dataTransfer.getData('id')
-      const track = audioStore.pattern.find(t => t.id === id)
-      if (track) {
-        const index = audioStore.pattern.findIndex(t => t.id === id)
-        audioStore.samples.push(track)
-        audioStore.pattern.splice(index, 1)
-      }
-    }
+    
     watch(() => audioStore.playback.beat.value, (val) => {
       if (val == null || val == undefined)
         return
@@ -336,10 +264,8 @@ export default {
       updateTempo,
       updateInterval,
       filters,
-      preview,
-      startDrag,
+      useStartDrag,
       onDropToPattern,
-      onDropToSamplesList,
       scrollTargetLeft,
       scrollTargetTop,
       scrollTargetRight,
@@ -349,7 +275,7 @@ export default {
       beforeLeave
     }
   },
-  components: { AccordionItem }
+  components: { SamplesList }
 }
 </script>
 <style lang="css">
