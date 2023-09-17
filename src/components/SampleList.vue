@@ -1,6 +1,6 @@
 <template lang="html">
     <transition appear name="fade" mode="out-in" tag="div" @drop="onDrop($event)" @dragenter.prevent @dragover.prevent>
-      <accordion-item :show="true" class="mb-1 md:mb-0">
+      <accordion-item :show="true" class="mb-1">
         <template v-slot:toggler>
           <font-awesome-icon :icon="['fas', 'drum']" class="mr-2"></font-awesome-icon> Samples ({{
             audioStore.getSamples.length

@@ -1,15 +1,15 @@
 <template lang="html">
-  <transition appear name="fade" mode="out-in" tag="div" class="md:hidden">
+  <transition appear name="fade" mode="out-in" tag="div">
     <accordion-item :show="true">
       <template v-slot:toggler>
         <font-awesome-icon :icon="['fas', 'gear']" class="mr-2"></font-awesome-icon> Settings
       </template>
       <div class="p-2">
-        <dl class="flex items-center text-slate-500">
-          <dt class="grow">
+        <dl class="grid grid-cols-2 text-slate-500">
+          <dt class="mb-1">
             <label for="bpm">BPM:</label>
           </dt>
-          <dd>
+          <dd class="mb-1 text-right">
             <input type="number" id="bpm" v-model="audioStore.playback.bpm.value" :min="audioStore.playback.bpm.min"
               :max="audioStore.playback.bpm.max" class="px-2 border rounded w-24 bg-slate-100 text-slate-500 outline-none"
               @input="audioStore.updateInterval" @change="audioStore.updateTempo" @focus.native="$event.target.select()" />

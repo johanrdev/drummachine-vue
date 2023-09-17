@@ -12,7 +12,6 @@
 
         <div class="md:col-span-9 order-0 md:order-1 flex flex-col">
           <control-panel></control-panel>
-
           <drum-grid></drum-grid>
         </div>
       </section>
@@ -41,9 +40,6 @@ export default {
         previewing: false
       }
     })
-    return {
-      audioStore
-    }
   }
 }
 </script>
