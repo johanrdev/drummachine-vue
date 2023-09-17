@@ -22,7 +22,7 @@
             </li>
           </ul>
           <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
-            <span class="text-slate-400 mx-4 select-none">Drag samples here to add them</span>
+            <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
           </div>
         </div>
       </div>
@@ -74,7 +74,10 @@
                   <li v-for="(_, noteIndex) in track.notes" class="flex mb-1 mr-1 last:mr-0">
                     <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
                       class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
-                      :class="{ 'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1 }"
+                      :class="{ 
+                        'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1,
+                        'bg-slate-100': noteIndex % 4 === 0,
+                      }"
                       :false-value="0" :true-value="1" @keydown.prevent />
                   </li>
                 </ul>
@@ -83,7 +86,7 @@
             <span ref="scrollTargetEnd"></span>
           </div>
           <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
-            <span class="text-slate-400 mx-4">Drag samples here to add them</span>
+            <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
           </div>
         </div>
       </div>
