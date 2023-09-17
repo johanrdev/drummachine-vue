@@ -8,12 +8,18 @@
         <label for="search" class="block mb-2">
           <input type="text" v-model="term" class="border rounded p-2 w-full" placeholder="Search sample" />
         </label>
-        <ul class="max-h-80 overflow-y-auto">
-          <li v-for="sample in getSamples" class="mb-1 last:mb-0" draggable="true" @dragstart="startDrag($event, sample)">
-            <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move"
-              @click="preview(sample)">{{ sample.name }}</div>
-          </li>
-        </ul>
+        <div class="h-80 flex flex-col">
+          <ul class="overflow-y-auto grow" v-if="getSamples.length">
+            <li v-for="sample in getSamples" class="mb-1 last:mb-0" draggable="true"
+              @dragstart="startDrag($event, sample)">
+              <div class="p-4 border-2 border-slate-300 rounded bg-slate-100 text-slate-500 cursor-move select-none"
+                @click="preview(sample)">{{ sample.name }}</div>
+            </li>
+          </ul>
+          <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
+            <span class="text-slate-400 mx-4 select-none">Drag samples here to add them</span>
+          </div>
+        </div>
       </div>
       <div class="md:col-span-9 order-0 md:order-1">
         <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
@@ -49,9 +55,10 @@
             </label>
           </div>
         </nav>
-        <div class="h-80 flex flex-col" @drop="onDropAddTrack($event)" @dragenter.prevent @dragover.prevent>
-          <ul class="overflow-auto flex p-2 flex-col" v-if="pattern.length">
-            <li v-for="(track, trackIndex) in pattern" class="flex">
+        <div class="h-80 flex flex-col" @drop="onDrop($event)" @dragenter.prevent @dragover.prevent>
+          <ul class="overflow-auto flex flex-col" v-if="pattern.length">
+            <li v-for="(track, trackIndex) in pattern" class="flex" draggable="true"
+              @dragstart="startDrag($event, track)">
               <span
                 class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
                   track.name.replaceAll('-', ' ') }}</span>
@@ -331,7 +338,7 @@ export default {
       event.dataTransfer.effectAllowed = 'move'
     }
 
-    const onDropAddTrack = (event) => {
+    const onDrop = (event) => {
       const id = event.dataTransfer.getData('id')
       const index = samples.value.findIndex(s => s.id === id)
       const sample = samples.value.find(s => s.id === id)
@@ -365,7 +372,7 @@ export default {
       getSamples,
       preview,
       startDrag,
-      onDropAddTrack
+      onDrop
     }
   }
 }
