@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 export const useAudioStore = defineStore('audioStore', {
   state: () => ({
     search: '',
+    howl: null,
     timer: null,
     playback: {
       playing: false,
@@ -14,6 +15,10 @@ export const useAudioStore = defineStore('audioStore', {
       beat: {
         value: 0,
         max: 16
+      },
+      stereo: {
+        volume: 0.5,
+        panning: 0
       }
     },
     samples: [],
@@ -181,6 +186,12 @@ export const useAudioStore = defineStore('audioStore', {
       if (this.playback.bpm.value > this.playback.bpm.max) return
 
       this.timer.updateInterval((60000 / this.playback.bpm.value) / 4)
+    },
+    updateVolume() {
+      this.howl.volume(this.playback.stereo.volume)
+    },
+    updatePanning() {
+      this.howl.stereo(parseFloat(this.playback.stereo.panning))
     }
   }
 })

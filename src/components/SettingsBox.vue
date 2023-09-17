@@ -14,6 +14,18 @@
               :max="audioStore.playback.bpm.max" class="px-2 border rounded w-24 bg-slate-100 text-slate-500 outline-none"
               @input="audioStore.updateInterval" @change="audioStore.updateTempo" @focus.native="$event.target.select()" />
           </dd>
+          <dt class="mb-1">
+            <label for="volume">Volume:</label>
+          </dt>
+          <dd class="mb-1 text-right">
+            <input type="range" min="0" max="1" step="0.01" v-model="audioStore.playback.stereo.volume" class="w-full" @input="audioStore.updateVolume" />
+          </dd>
+          <dt class="mb-1">
+            <label for="panning">Panning:</label>
+          </dt>
+          <dt class="mb-1 text-right">
+            <input type="range" min="-1" max="1" step="0.01" v-model="audioStore.playback.stereo.panning" class="w-full" @input="audioStore.updatePanning" />
+          </dt>
         </dl>
       </div>
     </accordion-item>

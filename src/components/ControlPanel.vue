@@ -82,7 +82,7 @@ export default {
       }
       audioStore.pattern.forEach((track) => {
         if (track.notes[audioStore.playback.beat.value] === 1) {
-          howl.play(track.slug)
+          audioStore.howl.play(track.slug)
         }
       });
       audioStore.playback.beat.value += 1
@@ -108,7 +108,7 @@ export default {
       audioStore.playback.beat.value = 0
     }
 
-    const howl = new Howl(audioStore.audioSource)
+    audioStore.howl = new Howl(audioStore.audioSource)
     audioStore.timer = new Timer(repeat, (60000 / audioStore.playback.bpm.value) / 4)
 
     return {
