@@ -4,12 +4,13 @@
       <span class="block font-semibold text-slate-200 text-2xl text-center select-none§">GrooveBox</span>
     </header>
     <section class="grid grid-cols-1 gap-3 md:grid-cols-12 p-3">
-      <div class="md:col-span-3 order-1 md:order-0">
-        <label for="search" class="block mb-2">
-          <input type="text" v-model="term" class="border rounded p-2 w-full" placeholder="Search sample" />
-        </label>
-        <div class="h-80 flex flex-col" @drop="onDropToSamplesList($event)" @dragenter.prevent @dragover.prevent>
-          <ul class="overflow-y-auto grow" v-if="getSamples.length">
+      <transition appear name="fade" mode="out-in" tag="div" class="h-[396px] flex flex-col md:col-span-3 order-1 md:order-0"
+        @drop="onDropToSamplesList($event)" @dragenter.prevent @dragover.prevent>
+        <div v-if="getSamples.length">
+          <label for="search" class="block mb-2">
+            <input type="text" v-model="term" class="border rounded p-2 w-full" placeholder="Search sample" />
+          </label>
+          <ul class="overflow-y-auto grow">
             <li v-for="sample in getSamples" class="mb-1 last:mb-0" draggable="true"
               @dragstart="startDrag($event, sample)">
               <div
@@ -21,12 +22,12 @@
               </div>
             </li>
           </ul>
-          <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
-            <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
-          </div>
         </div>
-      </div>
-      <div class="md:col-span-9 order-0 md:order-1">
+        <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
+          <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
+        </div>
+      </transition>
+      <div class="md:col-span-9 order-0 md:order-1 flex flex-col">
         <nav class="grid md:grid-cols-3 md:grid-cols-3 gap-3 mb-3">
           <div class="md-col-start-1 md:flex justify-start gap-1 hidden">
             <button class="action-btn" @click="filters.reverse">
@@ -60,34 +61,35 @@
             </label>
           </div>
         </nav>
-        <div class="h-80 flex flex-col" @drop="onDropToPattern($event)" @dragenter.prevent @dragover.prevent>
-          <div class="overflow-auto flex grow" v-if="pattern.length">
-            <span ref="scrollTargetStart"></span>
-            <ul class="flex flex-col">
-              <li v-for="(track, trackIndex) in pattern" :id="track.id" class="flex" draggable="true"
-                @dragstart="startDrag($event, track)">
-                <span :id="track.id"
-                  class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
-                    track.name }}</span>
+        <div class="grow min-h-[344px] max-h-[344px] flex flex-col" @drop="onDropToPattern($event)" @dragenter.prevent @dragover.prevent>
+          <transition appear name="fade" mode="out-in" tag="div" class="overflow-auto grow flex">
+            <div v-if="pattern.length">
+              <span ref="scrollTargetStart"></span>
+              <ul class="flex flex-col">
+                <li v-for="(track, trackIndex) in pattern" :id="track.id" class="flex" draggable="true"
+                  @dragstart="startDrag($event, track)">
+                  <span :id="track.id"
+                    class="h-12 px-2 mr-2 min-w-[150px] whitespace-nowrap overflow-hidden hidden md:flex md:grow md:items-center select-none cursor-move bg-slate-100 text-slate-500 rounded">{{
+                      track.name }}</span>
 
-                <ul class="flex">
-                  <li v-for="(_, noteIndex) in track.notes" class="flex mb-1 mr-1 last:mr-0">
-                    <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
-                      class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
-                      :class="{ 
-                        'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1,
-                        'bg-slate-100': noteIndex % 4 === 0,
-                      }"
-                      :false-value="0" :true-value="1" @keydown.prevent />
-                  </li>
-                </ul>
-              </li>
-            </ul>
-            <span ref="scrollTargetEnd"></span>
-          </div>
-          <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
-            <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
-          </div>
+                  <ul class="flex">
+                    <li v-for="(_, noteIndex) in track.notes" class="flex mb-1 mr-1 last:mr-0">
+                      <input type="checkbox" v-model="pattern[trackIndex].notes[noteIndex]"
+                        class="w-12 h-12 border-2 border-slate-300 rounded appearance-none cursor-pointer checked:bg-teal-500 checked:border-teal-600"
+                        :class="{
+                          'bg-slate-200 checked:bg-teal-700 checked:border-teal-800': noteIndex === playback.beat.value - 1,
+                          'bg-slate-100': noteIndex % 4 === 0,
+                        }" :false-value="0" :true-value="1" @keydown.prevent />
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+              <span ref="scrollTargetEnd"></span>
+            </div>
+            <div class="border-2 border-dashed border-slate-200 grow flex flex-col justify-center items-center" v-else>
+              <span class="text-slate-400 mx-4 select-none text-center">Drag samples here to add them</span>
+            </div>
+          </transition>
         </div>
       </div>
     </section>
@@ -462,5 +464,32 @@ export default {
 
 #app {
   font-family: 'Poppins';
+}
+
+.slide-in-from-left-enter-from,
+.slide-in-from-left-leave-to {
+  opacity: 0;
+  transform: translateX(-100px)
+}
+
+/* .slide-in-from-left-enter-to,
+.slide-in-from-left-leave-from {
+  opacity: 1;
+  transform: translateX(0);
+} */
+
+.slide-in-from-left-enter-active,
+.slide-in-from-left-leave-active {
+  transition: all .75s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity .4s ease-in-out;
 }
 </style>
