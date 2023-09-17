@@ -39,7 +39,19 @@
               <template v-slot:toggler>
                 <font-awesome-icon :icon="['fas', 'gear']" class="mr-2"></font-awesome-icon> Settings
               </template>
-              <span class="block p-2">Settings</span>
+              <div class="p-2">
+                <dl class="flex items-center text-slate-500">
+                  <dt class="grow">
+                    <label for="bpm">BPM:</label>
+                  </dt>
+                  <dd>
+                    <input type="number" id="bpm" v-model="playback.bpm.value" :min="playback.bpm.min"
+                    :max="playback.bpm.max"
+                    class="px-2 border rounded w-24 bg-slate-100 text-slate-500 outline-none"
+                    @input="updateInterval" @change="updateTempo" @focus.native="$event.target.select()" />
+                  </dd>
+                </dl>
+              </div>
             </accordion-item>
           </transition>
         </div>
@@ -549,4 +561,5 @@ export default {
 .list-fade-leave-active {
   position: absolute;
   width: 100%;
-}</style>
+}
+</style>
